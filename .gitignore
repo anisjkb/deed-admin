@@ -1,0 +1,24 @@
+.env
+.env.*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Build & venv
+.venv/
+dist/
+build/
+pip-wheel-metadata/
+
+# IDE
+.vscode/
+.idea/
+
+# Static uploads (if any)
+src/backend/static/uploads/
+
+# Coverage
+.coverage
+htmlcov/

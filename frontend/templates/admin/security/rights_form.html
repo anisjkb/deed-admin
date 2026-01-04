@@ -1,0 +1,70 @@
+{% extends "admin/master.html" %}
+
+{% block title %}Assign Rights{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<div class="menu-admin">
+  <h3>Assign Rights</h3>
+
+  {% if flashes and flashes|length %}
+    <div class="flash-stack">
+      {% for f in flashes %}
+        <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" action="/admin/rights/new" class="form-card">
+    <div class="grid">
+      <div>
+        <label for="role_id">Role *</label>
+        <select name="role_id" required>
+          <option value="">Select Role</option>
+          {% for role in roles %}
+            <option value="{{ role.role_id }}">{{ role.role_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label for="menu_id">Menu *</label>
+        <select name="menu_id" required>
+          <option value="">Select Menu</option>
+          {% for menu in menus %}
+            <option value="{{ menu.menu_id }}">{{ menu.menu_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label for="create_permit">Create Permission</label>
+        <input type="checkbox" name="create_permit" value="Y">
+      </div>
+
+      <div>
+        <label for="view_permit">View Permission</label>
+        <input type="checkbox" name="view_permit" value="Y">
+      </div>
+
+      <div>
+        <label for="edit_permit">Edit Permission</label>
+        <input type="checkbox" name="edit_permit" value="Y">
+      </div>
+
+      <div>
+        <label for="delete_permit">Delete Permission</label>
+        <input type="checkbox" name="delete_permit" value="Y">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn" href="/admin/master"><i class="fas fa-arrow-left"></i> Back</a>
+      <button class="btn btn-primary" type="submit">
+        <i class="fas fa-save"></i> Assign Rights
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

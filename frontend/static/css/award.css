@@ -1,0 +1,10 @@
+/* frontend/static/css/award.css*/
+
+#cropContainer img {
+  max-height: 400px;
+  width: auto;
+}
+
+#cropContainer {
+  max-width: 100%;
+}

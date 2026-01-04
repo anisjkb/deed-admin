@@ -1,0 +1,52 @@
+{# frontend/templates/admin/shared/side_menu.html #}
+{# Renders the side menu based on menu_tree (already prepared in add_common) #}
+{% import 'admin/shared/menu_macros.html' as m %}
+
+<ul class="side-menu">
+  {% if menu_tree and menu_tree|length > 0 %}
+    {% for parent in menu_tree %}
+      {% set purl = parent.url | default('') %}
+      {% set parent_href = '#' %}
+      {% if parent.children and parent.children|length > 0 %}
+        {% set parent_href = '#' %}
+      {% elif purl and purl != '#' %}
+        {% set parent_href = '/' ~ purl.lstrip('/') %}
+      {% endif %}
+
+      <li class="menu-item {% if parent.children and parent.children|length > 0 %}has-children{% endif %}">
+        <a href="{{ parent_href }}">
+          {% if parent.icon %}
+            {{ m.menu_icon(parent.icon, parent.icon_css) }}
+          {% endif %}
+          <span>{{ parent.menu_name }}</span>
+          {% if parent.children and parent.children|length > 0 %}
+            <i class="fas fa-chevron-down caret" aria-hidden="true"></i>
+          {% endif %}
+        </a>
+
+        {% if parent.children and parent.children|length > 0 %}
+          <ul class="submenu">
+            {% for child in parent.children %}
+              {% set curl = child.url | default('') %}
+              {% set child_href = '#' %}
+              {% if curl and curl != '#' %}
+                {% set child_href = '/' ~ curl.lstrip('/') %}
+              {% endif %}
+
+              <li class="submenu-item">
+                <a href="{{ child_href }}">
+                  {% if child.icon %}
+                    {{ m.menu_icon(child.icon, child.icon_css) }}
+                  {% endif %}
+                  <span>{{ child.menu_name }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  {% else %}
+    <li><em>No menu available for your role.</em></li>
+  {% endif %}
+</ul>

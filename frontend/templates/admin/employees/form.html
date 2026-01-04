@@ -1,0 +1,431 @@
+{# frontend/templates/admin/employees/form.html #}
+{% extends "admin/master.html" %}
+
+{% block title %}
+  {{ 'Create Employee' if mode=='create' else ('Edit Employee — ' ~ (form.emp_name or form.emp_id)) }}
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', path='css/admin/employees.css') }}?v={{ static_version }}">
+{% endblock %}
+
+{% block content %}
+{# Safe inline placeholder (no 404 risk) #}
+{% set PHOTO_PLACEHOLDER = "data:image/svg+xml;utf8," ~
+  "<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'>" ~
+  "<defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'>" ~
+  "<stop offset='0' stop-color='%23f3f4f6'/>" ~
+  "<stop offset='1' stop-color='%23e5e7eb'/>" ~
+  "</linearGradient></defs>" ~
+  "<rect width='160' height='160' rx='24' fill='url(%23g)'/>" ~
+  "<circle cx='80' cy='64' r='22' fill='%23cbd5e1'/>" ~
+  "<path d='M36 134c10-22 28-34 44-34s34 12 44 34' fill='%23cbd5e1'/>" ~
+  "<text x='80' y='154' font-family='Arial' font-size='10' text-anchor='middle' fill='%2394a3b8'>No photo</text>" ~
+  "</svg>"
+%}
+
+<div class="emp-page">
+
+  <!-- Header -->
+  <div class="emp-head">
+    <div>
+      <h3>
+        {% if mode=='create' %}
+          Create Employee
+        {% else %}
+          Edit Employee — {{ form.emp_name}}  ({{form.emp_id}})
+        {% endif %}
+      </h3>
+      <div class="emp-sub">
+        {% if mode=='create' %}
+          Add a new employee profile and assign hierarchy.
+        {% else %}
+          Update employee information, hierarchy, and profile details.
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="emp-actions">
+      <a href="/admin/employees" class="btn btn-back">
+        <i class="fas fa-arrow-left"></i> Back to List
+      </a>
+    </div>
+  </div>
+
+  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+  {% if flashes and flashes|length %}
+    <div class="flash-stack">
+      {% for f in flashes %}
+        <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Card -->
+  <div class="emp-card">
+    <form method="post"
+          action="{{ '/admin/employees' if mode=='create' else ('/admin/employees/' ~ form.emp_id) }}"
+          class="form-card"
+          enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+      {# ==========================================================
+         SECTION: PHOTO (UPLOAD + PREVIEW + DELETE)
+         - Upload field name: photo_file
+         - Route reads deletePhotoFlag ("1" to delete)
+         ========================================================== #}
+      <div class="emp-section-title">
+        <h4><i class="fas fa-camera"></i> Profile Photo</h4>
+        <span class="hint"> Upload AVIF/WEBP/JPG/PNG (recommended: square)</span>
+      </div>
+
+      <div class="emp-grid">
+        <div class="emp-field span-2">
+          <label>Upload Photo</label>
+
+          <div class="emp-upload">
+            <div class="emp-upload-left">
+              <input
+                id="photoInput"
+                type="file"
+                name="photo_file"
+                accept="image/avif,image/webp,image/jpeg,image/jpg,image/png">
+
+              <div class="emp-help">
+                Allowed: AVIF/WEBP/JPG/PNG — Max size: 2MB
+              </div>
+
+              <input type="hidden" id="deletePhotoFlag" name="deletePhotoFlag" value="0">
+            </div>
+
+            <div class="emp-upload-right">
+
+              {# side-by-side previews #}
+              <div class="emp-preview-grid">
+                <div class="emp-photo-preview">
+                  <div class="tag">Existing</div>
+                  <img class="emp-photo-img" id="existingPhoto"
+                       src="{{ form.photo_url or PHOTO_PLACEHOLDER }}"
+                       alt="Existing Photo">
+                </div>
+
+                <div class="emp-photo-preview">
+                  <div class="tag">New preview</div>
+                  <img class="emp-photo-img" id="newPhotoPreview"
+                       src="{{ PHOTO_PLACEHOLDER }}"
+                       alt="New preview">
+                </div>
+              </div>
+
+              <div class="emp-upload-actions">
+                <button type="button" class="btn btn-secondary" id="photoReplaceBtn">
+                  <i class="fas fa-upload"></i> Choose Photo
+                </button>
+
+                <button type="button"
+                        class="btn btn-danger"
+                        id="photoDeleteBtn"
+                        {% if (not form.photo_url) %}disabled{% endif %}>
+                  <i class="fas fa-trash"></i> Delete Photo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+<div class="emp-field">
+  <label>Photo URL</label>
+  <input type="text"
+         name="photo_url"
+         value="{{ form.photo_url or '' }}"
+         placeholder="Auto-filled after upload"
+         readonly
+         class="is-readonly">
+  <div class="emp-help">
+    Auto-filled after upload.
+  </div>
+</div>
+
+      </div>
+
+      <!-- SECTION: Basic -->
+      <div class="emp-section-title">
+        <h4><i class="fas fa-id-badge"></i> Basic Information</h4>
+        <span class="hint">Core identity fields</span>
+      </div>
+
+      <div class="emp-grid">
+        <div class="emp-field">
+          <label>Employee ID *</label>
+          <input type="text"
+                 name="emp_id"
+                 value="{{ form.emp_id or '' }}"
+                 maxlength="6"
+                 minlength="6"
+                 required
+                 {% if mode=='edit' %}readonly{% endif %}>
+          <div class="emp-help">Exactly 6 characters. Cannot be changed after creation.</div>
+        </div>
+
+        <div class="emp-field">
+          <label>Employee Name *</label>
+          <input type="text" name="emp_name" value="{{ form.emp_name or '' }}" required>
+        </div>
+
+        <div class="emp-field">
+          <label>Employee Type</label>
+          {% set current_type = form.emp_type or 'Contractual' %}
+          <select name="emp_type">
+            <option value="Contractual" {{ 'selected' if current_type == 'Contractual' }}>Contractual</option>
+            <option value="Permanent"   {{ 'selected' if current_type == 'Permanent' }}>Permanent</option>
+            <option value="Management"  {{ 'selected' if current_type == 'Management' }}>Management</option>
+            <option value="Board Member" {{ 'selected' if current_type == 'Board Member' }}>Board Member</option>
+          </select>
+        </div>
+
+        <div class="emp-field">
+          <label>Gender</label>
+          <select name="gender">
+            <option value="">--</option>
+            <option value="male"   {{ 'selected' if (form.gender or '')=='male' }}>male</option>
+            <option value="female" {{ 'selected' if (form.gender or '')=='female' }}>female</option>
+            <option value="other"  {{ 'selected' if (form.gender or '')=='other' }}>other</option>
+          </select>
+        </div>
+
+        <div class="emp-field">
+          <label>Date of Birth</label>
+          <input type="date" name="dob" value="{{ form.dob or '' }}">
+        </div>
+
+        <div class="emp-field">
+          <label>Status</label>
+          <select name="status">
+            <option value="active"   {{ 'selected' if (form.status or 'active')=='active' }}>active</option>
+            <option value="inactive" {{ 'selected' if (form.status or '')=='inactive' }}>inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SECTION: Contact -->
+      <div class="emp-section-title">
+        <h4><i class="fas fa-phone-alt"></i> Contact</h4>
+        <span class="hint">Communication & dates</span>
+      </div>
+
+      <div class="emp-grid">
+        <div class="emp-field">
+          <label>Mobile</label>
+          <input type="text" name="mobile" value="{{ form.mobile or '' }}">
+        </div>
+
+        <div class="emp-field">
+          <label>Email</label>
+          <input type="email" name="email" value="{{ form.email or '' }}">
+        </div>
+
+        <div class="emp-field">
+          <label>Join Date</label>
+          <input type="date" name="join_date" value="{{ form.join_date or '' }}">
+        </div>
+
+        <div class="emp-field">
+          <label>Emergency Phone</label>
+          <input type="text" name="emergency_phone" value="{{ form.emergency_phone or '' }}">
+        </div>
+
+        <div class="emp-field">
+          <label>LinkedIn URL</label>
+          <input type="text" name="linkedin_url" value="{{ form.linkedin_url or '' }}">
+        </div>
+
+        <div class="emp-field">
+          <label>Sort Order</label>
+          <input type="number" name="sort_order" value="{{ form.sort_order if form.sort_order is not none else '' }}">
+        </div>
+      </div>
+
+      <!-- SECTION: Hierarchy -->
+      <div class="emp-section-title">
+        <h4><i class="fas fa-sitemap"></i> Hierarchy</h4>
+        <span class="hint">Group → Org → Zone → Branch → Designation</span>
+      </div>
+
+      <div class="emp-grid">
+        <div class="emp-field">
+          <label>Group</label>
+          <select name="group_id" id="groupSelect">
+            <option value="">-- Select Group --</option>
+            {% for g in groups %}
+              <option value="{{ g.group_id }}" {{ 'selected' if (form.group_id or '')==g.group_id }}>
+                {{ g.group_name }} - {{ g.group_id }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="emp-field">
+          <label>Organization</label>
+          <select name="org_id" id="orgSelect">
+            <option value="">-- Select Organization --</option>
+            {% for o in orgs %}
+              <option value="{{ o.org_id }}" {{ 'selected' if (form.org_id or '')==o.org_id }}>
+                {{ o.org_name }} - {{ o.org_id }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="emp-field">
+          <label>Zone</label>
+          <select name="zone_id" id="zoneSelect">
+            <option value="">-- Select Zone --</option>
+            {% for z in zones %}
+              <option value="{{ z.zone_id }}" {{ 'selected' if (form.zone_id or '')==z.zone_id }}>
+                {{ z.zone_name }} - {{ z.zone_id }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="emp-field">
+          <label>Branch</label>
+          <select name="br_id" id="branchSelect">
+            <option value="">-- Select Branch --</option>
+            {% for b in branches %}
+              <option value="{{ b.br_id }}" {{ 'selected' if (form.br_id or '')==b.br_id }}>
+                {{ b.br_name }} - {{ b.br_id }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="emp-field">
+          <label>Designation</label>
+          <select name="desig_id" id="desigSelect">
+            <option value="">-- Select Designation --</option>
+            {% for d in designations %}
+              <option value="{{ d.desig_id }}" {{ 'selected' if (form.desig_id or '')==d.desig_id }}>
+                {{ d.desig_name }} - {{ d.desig_id }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- SECTION: Personal -->
+      <div class="emp-section-title">
+        <h4><i class="fas fa-user"></i> Personal Details</h4>
+        <span class="hint">Optional personal info</span>
+      </div>
+
+      <div class="emp-grid">
+        <div class="emp-field">
+          <label>NID</label>
+          <input type="text" name="nid" value="{{ form.nid or '' }}">
+        </div>
+
+        <div class="emp-field">
+          <label>Blood Group</label>
+          <input type="text" name="blood_group" value="{{ form.blood_group or '' }}">
+        </div>
+
+        <div class="emp-field span-2">
+          <label>Address</label>
+          <input type="text" name="address" value="{{ form.address or '' }}">
+        </div>
+      </div>
+
+      <!-- SECTION: Bio -->
+      <div class="emp-section-title">
+        <h4><i class="fas fa-pen-nib"></i> Bio</h4>
+        <span class="hint">Frontend display content</span>
+      </div>
+
+      <div class="emp-grid">
+        <div class="emp-field span-3">
+          <label>Short Bio</label>
+          <textarea name="bio" rows="2">{{ form.bio or '' }}</textarea>
+        </div>
+
+        <div class="emp-field span-3">
+          <label>Detailed Bio</label>
+          <textarea name="bio_details" rows="6">{{ form.bio_details or '' }}</textarea>
+        </div>
+      </div>
+
+      <!-- Footer actions -->
+      <div class="emp-footer">
+        <div class="info">
+          <i class="fas fa-info-circle"></i>
+          {% if mode=='create' %}
+            Fill required fields and press Save.
+          {% else %}
+            Review updates and press Save.
+          {% endif %}
+        </div>
+
+        <div class="emp-footer-actions">
+          <button class="btn btn-primary" type="submit">
+            <i class="fas fa-save"></i> Save
+          </button>
+
+          <a href="/admin/employees" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i> Back to List
+          </a>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', path='js/admin/org/emp_info.js') }}?v={{ static_version }}" defer></script>
+
+<script nonce="{{ request.state.csp_nonce }}">
+  (function(){
+    const fileInput = document.getElementById("photoInput");
+    const replaceBtn = document.getElementById("photoReplaceBtn");
+    const deleteBtn = document.getElementById("photoDeleteBtn");
+    const deleteFlag = document.getElementById("deletePhotoFlag");
+    const newPrev = document.getElementById("newPhotoPreview");
+    const existing = document.getElementById("existingPhoto");
+
+    if (replaceBtn && fileInput) {
+      replaceBtn.addEventListener("click", () => fileInput.click());
+    }
+
+    if (fileInput && newPrev) {
+      fileInput.addEventListener("change", (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+
+        if (deleteFlag) deleteFlag.value = "0";
+
+        // show uploaded preview beside existing
+        const url = URL.createObjectURL(f);
+        newPrev.src = url;
+        newPrev.style.display = "block";
+
+        if (existing) existing.style.opacity = "1";
+        if (deleteBtn) deleteBtn.disabled = false;
+      });
+    }
+
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", () => {
+        if (!confirm("Delete this photo?")) return;
+        if (deleteFlag) deleteFlag.value = "1";
+        if (existing) existing.style.opacity = "0.35";
+        if (fileInput) fileInput.value = "";
+        // reset preview to placeholder
+        // (keep it visible, no blank space)
+        newPrev.src = "{{ PHOTO_PLACEHOLDER }}";
+      });
+    }
+  })();
+</script>
+{% endblock %}

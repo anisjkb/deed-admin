@@ -1,0 +1,9 @@
+{% macro alerts(flashes) -%}
+  {% if flashes %}
+    <div class="flash-stack">
+      {% for f in flashes %}
+        <div class="alert alert-{{ f.category }}">{{ f.text }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{%- endmacro %}

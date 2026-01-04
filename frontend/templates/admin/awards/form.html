@@ -1,0 +1,187 @@
+{# frontend/templates/admin/awards/form.html #}
+{% extends "admin/master.html" %}
+
+{% block title %}
+  {{ 'Create Award' if mode=='create' else title }}
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h3>{{ 'Create Award' if mode=='create' else title }}</h3>
+  <a href="/admin/awards" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+
+<form method="post"
+      action="{{ '/admin/awards/new' if mode=='create' else ('/admin/awards/' ~ form.id ~ '/edit') }}"
+      class="form-card"
+      enctype="multipart/form-data">
+
+  <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+  <input type="hidden" id="deleteImageFlag" name="delete_image" value="0">
+
+  <div class="grid">
+
+      <div>
+        <label>Title *</label>
+        <input type="text" name="title" value="{{ form.title or '' }}" required>
+      </div>
+
+      <div>
+        <label>Issuer *</label>
+        <input type="text" name="issuer" value="{{ form.issuer or '' }}">
+      </div>
+
+      <div>
+        <label>Year *</label>
+        <input type="number" name="year" value="{{ form.year or '' }}" required>
+      </div>
+
+      <div>
+        <label>Description *</label>
+        <input type="text" name="description" value="{{ form.description or '' }}">
+      </div>
+
+      <!-- IMAGE UPLOAD SECTION -->
+      <div>
+        <label>Upload Image {% if mode == 'create' %}*{% endif %}</label>
+
+        <input type="file"
+               name="image_url"
+               id="imageInput"
+               accept="image/jpeg, image/png, image/jpg"
+               {% if mode == 'create' %}required{% endif %}>
+
+        <small>Allowed formats: AVIF, JPG, PNG, JPEG — Max 2MB</small><br>
+        <small>File size: <span id="fileSize">0 KB</span></small>
+
+        <!-- Existing Image (Edit Mode) -->
+        {% if mode == 'edit' and form.image_url %}
+          <div style="margin-top:10px;">
+            <p style="margin: 4px 0;">Existing Image:</p>
+            <img src="{{ form.image_url }}"
+                 id="existingImage"
+                 style="width:180px;border:1px solid #ccc;border-radius:6px;">
+            <br>
+            <button type="button"
+                    id="deleteImageBtn"
+                    style="margin-top:6px;background:#c62828;color:#fff;
+                           padding:5px 10px;border-radius:5px;">
+              Delete Image
+            </button>
+          </div>
+        {% endif %}
+
+        <!-- New Preview -->
+        <p id="newImageLabel" style="display:none;margin-top:10px;font-weight:bold;">New Image:</p>
+        <img id="previewImage"
+            style="display:none;margin-top:10px;width:180px;border:1px solid #ccc;border-radius:6px;">
+      </div>
+
+      <!-- CROPPING WORKSPACE -->
+      <div id="cropContainer"
+           style="display:none;margin-top:20px;padding:15px;background:#f8f8f8;
+                  border:1px solid #ddd;border-radius:8px;">
+
+        <h3 style="margin-top:0;">Crop Image</h3>
+
+        <!-- Toolbar -->
+        <div class="toolbar"
+             style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px;">
+          <button type="button" id="moveBtn">Move</button>
+          <button type="button" id="cropBtn">Crop</button>
+          <button type="button" id="zoomInBtn">Zoom +</button>
+          <button type="button" id="zoomOutBtn">Zoom –</button>
+          <button type="button" id="undoBtn">Undo</button>
+          <button type="button" id="redoBtn">Redo</button>
+          <button type="button" id="rotateLeftBtn">Rotate Left</button>
+          <button type="button" id="rotateRightBtn">Rotate Right</button>
+          <button type="button" id="flipXBtn">Flip X</button>
+          <button type="button" id="flipYBtn">Flip Y</button>
+          <button type="button" id="resetBtn">Reset</button>
+          <button type="button" id="lockBtn">Lock</button>
+          <button type="button" id="unlockBtn">Unlock</button>
+          <button type="button" id="replaceBtn">Replace</button>
+        </div>
+
+        <!-- Aspect Ratios -->
+        <div style="margin-bottom:10px;">
+          <button type="button" id="ar169">16:9</button>
+          <button type="button" id="ar43">4:3</button>
+          <button type="button" id="ar11">1:1</button>
+          <button type="button" id="ar23">2:3</button>
+          <button type="button" id="arFree">Free</button>
+        </div>
+
+        <!-- Crop Metadata -->
+        <div style="display:grid;grid-template-columns:repeat(2,150px);gap:10px;margin-bottom:10px;">
+          <label>X <input id="dataX" readonly></label>
+          <label>Y <input id="dataY" readonly></label>
+          <label>Width <input id="dataWidth" readonly></label>
+          <label>Height <input id="dataHeight" readonly></label>
+          <label>Rotate <input id="dataRotate" readonly></label>
+          <label>ScaleX <input id="dataScaleX" readonly></label>
+          <label>ScaleY <input id="dataScaleY" readonly></label>
+        </div>
+
+        <!-- Large crop preview -->
+        <div style="width:100%;max-height:500px;overflow:hidden;margin-bottom:10px;">
+          <img id="cropImage" style="max-width:100%;border-radius:6px;">
+        </div>
+
+        <div>
+          <button type="button"
+                  id="cropConfirmBtn"
+                  style="background:#0C7C90;color:#fff;padding:8px 14px;border-radius:6px;">
+            Apply Crop
+          </button>
+        </div>
+
+      </div>
+
+      <div>
+        <label>Published</label>
+        <select name="published">
+          <option value="Yes" {% if form.published == 'Yes' %}selected{% endif %}>Yes</option>
+          <option value="No"  {% if form.published == 'No'  %}selected{% endif %}>No</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Displaying Order *</label>
+        <input type="number" name="displaying_order" value="{{ form.displaying_order }}" placeholder="Optional">
+      </div>
+
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">
+      <i class="fas fa-save"></i> Save
+    </button>
+  </div>
+
+</form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{{ url_for('static', path='js/admin/ops/award.js') }}?v={{ static_version }}" defer></script>
+{% endblock %}

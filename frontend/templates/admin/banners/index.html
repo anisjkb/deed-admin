@@ -1,0 +1,75 @@
+{#frontend/templets/admin/banners/index.html#}
+{% extends "admin/master.html" %}
+
+{% block title %}Manage Banners{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Banners</h3>
+  <a class="btn btn-primary" href="/admin/banners/new">
+    <i class="fas fa-plus"></i> New Banner
+  </a>
+</div>
+
+<form class="search-bar" method="get" action="/admin/banners">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by any field..." aria-label="Search banners">
+  <button class="btn" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+</form>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Headline</th>
+        <th>Subhead</th>
+        <th>Sort Order</th>
+        <th>Active</th>
+        <th class="table-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.headline }}</td>
+        <td>{{ r.subhead }}</td>
+        <td>{{ r.sort_order }}</td>
+        <td>{{ 'Yes' if r.is_active else 'No' }}</td>
+        <td class="actions">
+          <a class="btn btn-xs" href="/admin/banners/{{ r.id }}/edit" title="Edit">
+            <i class="fas fa-edit"></i>
+          </a>
+          <form method="post" action="/admin/banners/{{ r.id }}/delete" class="delete-confirm" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+            <button class="btn btn-xs btn-danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">No banners found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="pagination">
+  {% for p in range(1, pages+1) %}
+    <a class="page {{ 'active' if p==page }}" href="/admin/banners?page={{p}}&size={{size}}{% if q %}&q={{ q }}{% endif %}">
+      {{ p }}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

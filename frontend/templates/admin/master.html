@@ -1,0 +1,116 @@
+<!--frontend/templates/admin/master.html --> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1 viewport-fit=cover"/>
+  <title>{% block title %}deed-admin{% endblock %}</title>
+
+  <!-- ================= CORE STYLES ================= -->
+  <link rel="stylesheet" href="{{ url_for('static', path='css/admin/main.css') }}?v={{ static_version }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/admin/badge-notifications.css') }}?v={{ static_version }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/common.css') }}?v={{ static_version }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/toast.css') }}?v={{ static_version }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/cropper.min.css') }}?v={{ static_version }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/admin/responsive-theme.css') }}?v={{ static_version }}"/>
+
+  {% block extra_css %}{% endblock %}
+
+  <!-- Icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="admin-shell">
+  <div class="full-screen">
+
+    <!-- ================= HEADER ================= -->
+    <header>
+      {% include 'admin/shared/home_header.html' %}
+    </header>
+
+    <!-- ================= BODY ================= -->
+    <main>
+      <div class="body-section">
+
+        <!-- Sidebar -->
+        <aside class="left-slidebar app-nav" aria-label="Primary">
+          <button id="navToggle"
+                  class="nav-toggle-orb"
+                  type="button"
+                  aria-label="Collapse sidebar"
+                  title="Collapse sidebar">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          {% include 'admin/shared/side_menu.html' %}
+        </aside>
+
+        <!-- Content -->
+        <section class="right-page-render" aria-live="polite">
+          {% block content %}{% endblock %}
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================================================= -->
+  <!-- JS LOAD ORDER IS CRITICAL (DO NOT REORDER)        -->
+  <!-- ================================================= -->
+
+  <!-- UI / Toast -->
+  <script nonce="{{ request.state.csp_nonce }}"
+          src="{{ url_for('static', path='js/ui/toast.js') }}?v={{ static_version }}"
+          defer></script>
+
+  <script nonce="{{ request.state.csp_nonce }}"
+          src="{{ url_for('static', path='js/menu-toggle.js') }}?v={{ static_version }}"
+          defer></script>
+
+  <script nonce="{{ request.state.csp_nonce }}"
+          src="{{ url_for('static', path='js/cropper.min.js') }}?v={{ static_version }}"
+          defer></script>
+
+  <!-- DELETE CONFIRM MODAL CONTROLLER -->
+  <script nonce="{{ request.state.csp_nonce }}"
+          src="{{ url_for('static', path='js/admin/confirm.js') }}?v={{ static_version }}"
+          defer></script>
+
+  <!-- AUTH MODALS (SESSION EXPIRED / FORBIDDEN) -->
+  <script nonce="{{ request.state.csp_nonce }}"
+          src="{{ url_for('static', path='js/auth/session-timeout.js') }}?v={{ static_version }}"
+          defer></script>
+
+  <!-- AUTH CORE (TOKEN + REFRESH HANDLING) -->
+  <script nonce="{{ request.state.csp_nonce }}"
+          src="{{ url_for('static', path='js/auth/token.js') }}?v={{ static_version }}"
+          defer></script>
+
+  <!-- ACTIVITY-BASED PROACTIVE REFRESH (HYBRID MODE) -->
+  <script nonce="{{ request.state.csp_nonce }}"
+          src="{{ url_for('static', path='js/auth/activity-refresh.js') }}?v={{ static_version }}"
+          defer></script>
+
+  <!-- ADMIN UI LOGIC -->
+  <script nonce="{{ request.state.csp_nonce }}"
+          src="{{ url_for('static', path='js/admin/scripts.js') }}?v={{ static_version }}"
+          defer></script>
+
+  {% block extra_js %}{% endblock %}
+
+  <!-- ================================================= -->
+  <!-- GLOBAL DELETE CONFIRM MODAL (DELETE ONLY)         -->
+  <!-- ================================================= -->
+  <div id="deleteConfirmModal" class="delete-modal-overlay">
+    <div class="delete-modal-box">
+      <h3><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h3>
+      <p id="deleteMessage">Are you sure you want to delete this item?</p>
+      <div class="delete-actions">
+        <button id="confirmDeleteBtn" class="btn btn-danger">Yes, Delete</button>
+        <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

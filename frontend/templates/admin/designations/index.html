@@ -1,0 +1,78 @@
+{% extends "admin/master.html" %}
+{% block title %}Manage Designations{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Designations</h3>
+  {# 🔒 hide "New" unless user has create-permit #}
+  {% if perms.create %}
+    <a class="btn btn-primary" href="/admin/designations/new"><i class="fas fa-plus"></i> New Designation</a>
+  {% endif %}
+</div>
+
+<form class="search-bar" method="get" action="/admin/designations">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search id/name/status">
+  <button class="btn" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+</form>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width:120px;">Desig ID</th>
+        <th>Name</th>
+        <th>Status</th>
+        <th class="table-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td><code>{{ r.desig_id }}</code></td>
+        <td class="wrap">{{ r.desig_name }}</td>
+        <td class="nowrap">{{ r.status }}</td>
+        <td class="actions">
+          {# 🔒 edit link #}
+          {% if perms.edit %}
+            <a class="btn btn-xs" href="/admin/designations/{{ r.desig_id }}/edit" title="Edit">
+              <i class="fas fa-edit"></i>
+            </a>
+          {% endif %}
+
+          {# 🔒 delete button + CSRF #}
+          {% if perms.delete %}
+            <form method="post" action="/admin/designations/{{ r.desig_id }}/delete"
+                  class="delete-confirm"
+                  message-confirm="Delete designation '{{ r.desig_name }}' ({{ r.desig_id }})?"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+              <button class="btn btn-xs btn-danger" title="Delete"><i class="fas fa-trash"></i></button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No designations found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="pagination">
+  {% for p in range(1, pages+1) %}
+    <a class="page {{ 'active' if p==page }}" href="/admin/designations?page={{p}}&size={{size}}{% if q %}&q={{ q }}{% endif %}">
+      {{ p }}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

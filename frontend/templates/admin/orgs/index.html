@@ -1,0 +1,81 @@
+{% extends "admin/master.html" %}
+{% block title %}Manage Organizations{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Organizations</h3>
+  {% if perms.create %}
+    <a class="btn btn-primary" href="/admin/orgs/new"><i class="fas fa-plus"></i> New Organization</a>
+  {% endif %}
+</div>
+
+<form class="search-bar" method="get" action="/admin/orgs">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search id/name/address/status">
+  <button class="btn" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+</form>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width:120px;">Org ID</th>
+        <th>Group ID</th>
+        <th>Org Name</th>
+        <th>Address</th>
+        <th>Status</th>
+        <th class="table-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td><code>{{ r.org_id }}</code></td>
+        <td>{{ r.group_id }}</td>
+        <td class="wrap">{{ r.org_name }}</td>
+        <td class="wrap">{{ r.org_address or '' }}</td>
+        <td class="nowrap">{{ r.status }}</td>
+        <td class="actions">
+          {% if perms.edit %}
+            <a class="btn btn-xs" href="/admin/orgs/{{ r.org_id }}/edit" title="Edit"><i class="fas fa-edit"></i></a>
+          {% endif %}
+
+          {% if perms.delete %}
+            <form method="post" action="/admin/orgs/{{ r.org_id }}/delete"
+                  class="delete-confirm"
+                  message-confirm="Are you sure you want to delete org '{{ r.org_name }}' ({{ r.org_id }})?"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+              <button class="btn btn-xs btn-danger" title="Delete"><i class="fas fa-trash"></i></button>
+            </form>
+          {% endif %}
+
+          {% if not (perms.edit or perms.delete) %}
+            <span class="muted">No actions</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">No organizations found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="pagination">
+  {% for p in range(1, pages+1) %}
+    <a class="page {{ 'active' if p==page }}" href="/admin/orgs?page={{p}}&size={{size}}{% if q %}&q={{ q }}{% endif %}">
+      {{ p }}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

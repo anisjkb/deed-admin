@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/auth.css') }}?v={{ static_version }}"/>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <h3>Register</h3>
+
+  {% if flashes and flashes|length %}
+    <div class="flash-stack">
+      {% for f in flashes %}
+        <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <p id="errorMsg" class="error" aria-live="polite"></p>
+
+  <form id="registerForm" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}"/>
+
+    <div class="floating-field">
+      <input type="text" name="emp_id" id="emp_id" placeholder=" " maxlength="20" autocomplete="off" required />
+      <label for="emp_id">Employee ID</label>
+    </div>
+    <small class="input-error" id="empIdError"></small>
+
+    <div class="floating-field">
+      <input type="text" name="login_id" id="login_id" placeholder=" " maxlength="50" autocomplete="username" required />
+      <label for="login_id">Login ID</label>
+    </div>
+    <small class="input-error" id="loginIdError"></small>
+
+    <div class="floating-field">
+      <input type="text" name="role_id" id="role_id" placeholder=" " maxlength="2" autocomplete="off" required />
+      <label for="role_id">Role ID</label>
+    </div>
+    <small class="input-error" id="roleIdError"></small>
+
+    <div class="floating-field">
+      <input type="email" name="email" id="email" placeholder=" " maxlength="100" autocomplete="email" required />
+      <label for="email">Email</label>
+    </div>
+    <small class="input-error" id="emailError"></small>
+
+    <div class="floating-field">
+      <input type="password" name="password" id="password" placeholder=" " minlength="6" maxlength="255" autocomplete="new-password" required />
+      <label for="password">Password</label>
+    </div>
+    <small class="input-error" id="passwordError"></small>
+
+    <div class="floating-field">
+      <input type="password" name="confirm_password" id="confirmPassword" placeholder=" " minlength="6" maxlength="255" autocomplete="new-password" required />
+      <label for="confirmPassword">Confirm Password</label>
+    </div>
+    <small class="input-error" id="confirmError"></small>
+
+    <button type="submit" id="registerBtn" class="btn-primary">Register</button>
+  </form>
+
+  <p class="auth-footer-text">
+    Already have an account? <a href="/login">Login Here</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script nonce="{{ request.state.csp_nonce }}" src="{{ url_for('static', path='js/auth/register.js') }}?v={{ static_version }}" defer></script>
+{% endblock %}

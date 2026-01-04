@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+passlib[bcrypt]
+python-jose
+python-dotenv
+panel
+bokeh
+Jinja2Templates
+python-jose[cryptography]

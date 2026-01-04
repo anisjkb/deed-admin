@@ -1,0 +1,251 @@
+/* =====================================================================
+   deed-admin — Responsive + Eye-Comfort Theme Overrides
+   File: frontend/static/css/admin/responsive-theme.css
+   Load this AFTER: css/admin/main.css, css/common.css, css/toast.css, etc.
+   ===================================================================== */
+
+/* 1) Eye-comfort palette (override existing CSS variables from main.css)
+   - Avoid pure white backgrounds for large areas
+   - Keep text dark-slate (not black)
+*/
+:root{
+  /* Neutrals */
+  --bg:#F3F5F7;            /* app background (softer than pure white) */
+  --surface:#FFFFFF;       /* cards/panels */
+  --surface-2:#F8FAFC;     /* subtle blocks */
+  --ink:#0F172A;           /* strongest text */
+  --text:#1F2937;          /* body text */
+  --text-dim:#4B5563;      /* secondary text */
+  --muted:#6B7280;         /* helper text */
+
+  /* Brand (calm blue) */
+  --primary:#2563EB;
+  --primary-600:#1D4ED8;
+  --primary-700:#1E40AF;
+  --primary-800:#1E3A8A;
+  --primary-900:#172554;
+
+  /* Lines & Depth */
+  --line:#E5E7EB;
+  --line-strong:#D1D5DB;
+  --shadow-1:0 6px 18px rgba(17,24,39,.05);
+  --shadow-2:0 12px 28px rgba(17,24,39,.10);
+
+  /* Tables */
+  --table-head:#EEF2F7;
+  --table-row:#FFFFFF;
+  --table-alt:#F8FAFC;
+  --table-hover:#F1F5F9;
+
+  /* Sidebar */
+  --nav-bg:#111827;        /* deep slate (eye-friendly) */
+  --nav-surface:#0B1220;   /* darker inset */
+  --nav-ink:#E5E7EB;       /* light text */
+  --nav-muted:#9CA3AF;
+
+  /* Focus */
+  --focus-ring:0 0 0 3px rgba(37,99,235,.22);
+
+  /* Motion */
+  --fast:160ms;
+}
+
+/* 2) True full-screen sizing */
+html, body{height:100%; width:100%; margin:0;}
+body{min-height:100vh; background:var(--bg); color:var(--text);}
+
+/* 3) Make content wrappers stretch nicely */
+.full-screen{min-height:100vh;}
+.body-section{min-height:calc(100vh - 64px);}
+
+/* 4) Improve readability for long sessions */
+.right-page-render{
+  background:var(--bg);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* 5) Softer cards/panels (works with most components) */
+.card, .panel, .box, .content-card, .widget, .section-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow-1);
+  border-radius:12px;
+}
+
+/* 6) Links */
+a{color:var(--primary);}
+a:hover{color:var(--primary-600);}
+
+/* 7) Inputs: reduce glare + strong focus ring */
+input, select, textarea{
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  color:var(--text);
+  border-radius:10px;
+  box-sizing:border-box;
+}
+input:focus, select:focus, textarea:focus{
+  outline:none;
+  border-color:var(--primary);
+  box-shadow:var(--focus-ring);
+  background:#fff;
+}
+
+/* 8) Buttons (keeps existing classes, just improves comfort) */
+.btn, button, .button{
+  border-radius:10px;
+}
+.btn-primary, .primary-btn{
+  background:var(--primary);
+  border-color:var(--primary);
+  color:#fff;
+}
+.btn-primary:hover, .primary-btn:hover{
+  background:var(--primary-600);
+  border-color:var(--primary-600);
+}
+
+/* 9) Tables: calmer headers + hover */
+table{
+  background:var(--surface);
+}
+th{
+  background:var(--table-head) !important;
+  color:var(--text-dim);
+}
+tr:nth-child(even) td{
+  background:var(--table-alt);
+}
+tr:hover td{
+  background:var(--table-hover);
+}
+
+/* 10) Sidebar: ensure eye-comfort dark slate */
+.left-slidebar.app-nav{
+  background:var(--nav-bg);
+  color:var(--nav-ink);
+}
+.left-slidebar.app-nav a{
+  color:var(--nav-ink);
+}
+.left-slidebar.app-nav .menu-muted,
+.left-slidebar.app-nav .muted{
+  color:var(--nav-muted);
+}
+
+/* =====================================================================
+   RESPONSIVE LAYER
+   Uses existing JS toggle: nav element gets .is-collapsed
+   On mobile: treat "NOT collapsed" as "open drawer"
+   ===================================================================== */
+
+/* A) General spacing for smaller screens */
+@media (max-width: 992px){
+  .right-page-render{padding:18px;}
+}
+
+@media (max-width: 768px){
+  /* Reduce top gap if header is fixed; keep safe if not */
+  .body-section{
+    margin-top:64px;  /* main.css uses ~70px; slightly tighter on mobile */
+    min-height:calc(100vh - 64px);
+    display:block;    /* stack instead of side-by-side */
+  }
+
+  .right-page-render{
+    padding:14px;
+  }
+
+  /* B) Off-canvas sidebar using existing .is-collapsed */
+  .left-slidebar.app-nav{
+    position:fixed;
+    top:0;
+    left:0;
+    height:100vh;
+    width:280px;
+    max-width:86vw;
+    z-index:9999;
+    transform:translateX(0);                 /* open when NOT collapsed */
+    transition:transform var(--fast) ease;
+    box-shadow:0 14px 40px rgba(0,0,0,.18);
+  }
+
+  /* Hidden state */
+  .left-slidebar.app-nav.is-collapsed{
+    transform:translateX(-110%);
+  }
+
+  /* Make sure content occupies full width */
+  .right-page-render{
+    width:100%;
+  }
+
+  /* C) Overlay when sidebar is open (i.e., NOT collapsed) */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.38);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity var(--fast) ease;
+    z-index:9998;
+  }
+  body:has(.left-slidebar.app-nav:not(.is-collapsed))::before{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  /* D) Make the orb toggle easier to tap */
+  .nav-toggle-orb{
+    width:46px;
+    height:46px;
+    border-radius:999px;
+  }
+
+  /* E) Tables: allow horizontal scroll */
+  .table-responsive{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  table{
+    display:block;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    width:100%;
+  }
+
+  /* F) Grid/columns: stack (generic safety) */
+  .row, .form-row{display:block;}
+  [class*="col-"], .col, .col-md-6, .col-lg-4, .col-lg-6, .col-xl-6{
+    width:100% !important;
+    max-width:100% !important;
+  }
+
+  /* G) Buttons/inputs full width where appropriate */
+  .btn, button, input, select, textarea{
+    max-width:100%;
+  }
+}
+
+/* Phones */
+@media (max-width: 576px){
+  body{font-size:15px; line-height:1.6;}
+  .right-page-render{padding:12px;}
+
+  /* Slightly softer card radius on phones */
+  .card, .panel, .box, .content-card, .widget, .section-card{
+    border-radius:14px;
+  }
+}
+
+/* =====================================================================
+   Notes:
+   - If your browser doesn’t support :has(), overlay won’t appear.
+     Sidebar still works (open/close) because that’s transform-based.
+   - If you want overlay support everywhere, add a tiny JS to toggle
+     body class when sidebar opens; I can provide that if needed.
+   ===================================================================== */

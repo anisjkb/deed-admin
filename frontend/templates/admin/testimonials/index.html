@@ -1,0 +1,75 @@
+{#frontend/templates/admin/testimonials/index.html#}
+{% extends "admin/master.html" %}
+
+{% block title %}Manage Testimonials{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Testimonials</h3>
+  <a class="btn btn-primary" href="/admin/testimonials/new">
+    <i class="fas fa-plus"></i> New Testimonial
+  </a>
+</div>
+
+<form class="search-bar" method="get" action="/admin/testimonials">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by any field..." aria-label="Search testimonials">
+  <button class="btn" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+</form>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Project</th>
+        <th>Sort Order</th>
+        <th>Published</th>
+        <th class="table-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for testimonial in rows %}
+      <tr>
+        <td>{{ testimonial.name }}</td>
+        <td>{{ testimonial.role }}</td>
+        <td>{{ testimonial.project_title }}</td>
+        <td>{{ testimonial.sort_order }}</td>
+        <td>{{ testimonial.published }}</td>
+        <td class="actions">
+          <a class="btn btn-xs" href="/admin/testimonials/{{ testimonial.id }}/edit" title="Edit">
+            <i class="fas fa-edit"></i>
+          </a>
+          <form method="post" action="/admin/testimonials/{{ testimonial.id }}/delete" class="delete-confirm" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+            <button class="btn btn-xs btn-danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">No testimonials found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="pagination">
+  {% for p in range(1, pages+1) %}
+    <a class="page {{ 'active' if p == page }}" href="/admin/testimonials?page={{p}}&size={{size}}{% if q %}&q={{ q }}{% endif %}">
+      {{ p }}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

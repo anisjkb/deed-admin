@@ -1,0 +1,177 @@
+{% extends "admin/master.html" %}
+{% block title %}{{ 'Create Project' if mode=='create' else 'Edit Project — ' ~ form.slug }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>{{ 'Create Project' if mode=='create' else ('Edit Project — ' ~ form.slug) }}</h3>
+  <a href="/admin/projects" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+  <form method="post" action="{{ '/admin/projects' if mode=='create' else ('/admin/projects/' ~ form.id) }}" class="form-card" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+    <div class="grid">
+      <!-- Identity -->
+      <div>
+        <label>URL Slug (Page name) *</label>
+        <input type="text" name="slug" value="{{ form.slug or '' }}" required {% if mode=='edit' %}readonly{% endif %}>
+      </div>
+      <div>
+        <label>Title *</label>
+        <input type="text" name="title" value="{{ form.title or '' }}" required>
+      </div>
+      <div>
+        <label>Tagline</label>
+        <input type="text" name="tagline" value="{{ form.tagline or '' }}">
+      </div>
+
+      <div>
+        <label>Type *</label>
+        <select name="ptype" required>
+          <option value="residential" {{ 'selected' if (form.ptype or '')=='residential' }}>Residential</option>
+          <option value="commercial"  {{ 'selected' if (form.ptype or '')=='commercial'  }}>Commercial</option>
+        </select>
+      </div>
+      <div>
+        <label>Status *</label>
+        <select name="status" required>
+          <option value="ongoing"   {{ 'selected' if (form.status or '')=='ongoing' }}>Ongoing</option>
+          <option value="upcoming"  {{ 'selected' if (form.status or '')=='upcoming' }}>Upcoming</option>
+          <option value="completed" {{ 'selected' if (form.status or '')=='completed' }}>Completed</option>
+        </select>
+      </div>
+
+      <!-- Location -->
+      <div>
+        <label>Location</label>
+        <input type="text" name="location" value="{{ form.location or '' }}" placeholder="Bashundhara R/A, Dhaka">
+      </div>
+      
+      <!-- Ownership -->
+      <div>
+        <label>Branch</label>
+        <select name="br_id" id="projBranch">
+          <option value="">-- Select Branch --</option>
+          {% for b in branches %}
+          <option value="{{ b.br_id }}" {{ 'selected' if (form.br_id or '')==b.br_id }}>
+            {{ b.br_name }} - {{ b.br_id }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Owner (Employee)</label>
+        <select name="emp_id" id="projOwner">
+          <option value="">-- Select Employee --</option>
+          {% for e in employees %}
+          <option value="{{ e.emp_id }}" {{ 'selected' if (form.emp_id or '')==e.emp_id }}>
+            {{ e.emp_name }} - {{ e.emp_id }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Metrics -->
+      <div><label>Progress %</label><input type="number" min="0" max="100" name="progress_pct" value="{{ form.progress_pct or 0 }}"></div>
+      <div><label>Handover Date</label><input type="date" name="handover_date" value="{{ form.handover_date or '' }}"></div>
+
+      <div><label>Land Area (sft)</label><input type="number" name="land_area_sft" value="{{ form.land_area_sft or '' }}"></div>
+      <div><label>Floors</label><input type="number" name="floors" value="{{ form.floors or '' }}"></div>
+      <div><label>Total Units</label><input type="number" name="units_total" value="{{ form.units_total or '' }}"></div>
+      <div><label>Parking Spaces</label><input type="number" name="parking_spaces" value="{{ form.parking_spaces or '' }}"></div>
+      <div>
+        <label>Frontage (sft)</label>
+        <input type="number" required name="frontage_ft" value="{{ form.frontage_ft or '' }}" min="0" step="1" inputmode="numeric">
+      </div>
+      <div><label>Orientation</label><input type="text" name="orientation" value="{{ form.orientation or '' }}"></div>
+      <div><label>Size Range</label><input type="text" name="size_range" value="{{ form.size_range or '' }}" placeholder="1790–2210 sft"></div>
+
+      <!-- Media -->
+      <div>
+        <label>Hero Image (Upload New)</label>
+        <input type="file" name="hero_image_file" id="heroImageFile" accept="image/*">
+        {% if form.hero_image_url %}
+          <div class="image-preview">
+            <strong>Current Hero Image:</strong>
+            <img src="{{ form.hero_image_url }}" alt="Current Hero Image" style="max-width: 150px; max-height: 150px; margin-top: 10px;">
+          </div>
+        {% endif %}
+        <div class="image-preview">
+          <strong>New Image Preview:</strong>
+          <img id="newHeroImagePreview" src="#" alt="New Hero Image Preview" style="max-width: 150px; max-height: 150px; margin-top: 10px; display:none;">
+        </div>
+      </div>
+
+      <!-- Brochure -->
+      <div>
+        <label>Brochure (Upload New)</label>
+        <input type="file" name="brochure_file" id="brochureFile" accept="application/pdf,image/*">
+        {% if form.brochure_url %}
+          <div class="file-preview">
+            <strong>Current Brochure:</strong>
+            <a href="{{ form.brochure_url }}" target="_blank">View Current Brochure</a>
+          </div>
+        {% endif %}
+        <div class="file-preview">
+          <strong>New Brochure Preview:</strong>
+          <div id="newBrochurePreview" class="preview-container" style="width: 100%; max-width: 500px; height: 300px; display:none;">
+            <!-- PDF or Image will be previewed here -->
+          </div>
+          <button type="button" id="toggleBrochurePreview" class="btn btn-secondary" style="margin-top: 10px;">Toggle Brochure Preview</button>
+        </div>
+      </div>
+
+      <div>
+        <label>Video URL</label>
+        <input type="text" name="video_url" value="{{ form.video_url or '' }}">
+      </div>
+
+      <!-- Copy -->
+      <div style="grid-column: span 2;">
+        <label>Short Description</label>
+        <input type="text" name="short_desc" value="{{ form.short_desc or '' }}">
+      </div>
+      <div style="grid-column: span 2;">
+        <label>Highlights</label>
+        <input type="text" name="highlights" value="{{ form.highlights or '' }}">
+      </div>
+      <div style="grid-column: span 2;">
+        <label>Partners</label>
+        <input type="text" name="partners" value="{{ form.partners or '' }}">
+      </div>
+
+      <!-- Published Field -->
+      <div>
+        <label>Published *</label>
+        <select name="published" required>
+          <option value="Yes" {{ 'selected' if (form.published or '') == 'Yes' }}>Yes</option>
+          <option value="No" {{ 'selected' if (form.published or '') == 'No' }}>No</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save</button>
+      <a href="/admin/projects" class="btn btn-back">
+        <i class="fas fa-arrow-left"></i> Back to List
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{{ url_for('static', path='js/admin/ops/projects_info.js') }}?v={{ static_version }}" defer></script>
+{% endblock %}

@@ -1,0 +1,114 @@
+{#frontend/templets/admin/banners/form.html#}
+{% extends "admin/master.html" %}
+
+{% block title %}
+  {{ 'Create Banner' if mode=='create' else title }}
+{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>{{ 'Create Banner' if mode=='create' else title }}</h3>
+  <a href="/admin/banners" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card">
+  <form method="post" action="{{ '/admin/banners/new' if mode=='create' else ('/admin/banners/' ~ form.id~ '/edit') }}" class="form-card" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+    <div class="grid">
+      <!-- Image Upload Section (for both new and existing images) -->
+      <div>
+        <label>Upload Image {% if mode == 'create' %}*{% endif %}</label>
+        <input type="file" name="image_url" accept="image/avif,image/webp,image/jpeg,image/png" {% if mode == 'create' %}required{% endif %} id="imageInput">
+        <small>Allowed formats: AVIF, JPG, PNG, JPEG — Max 2MB</small><br>
+        <small>File size: <span id="fileSize">0 KB</span></small>
+
+        {% if mode == 'edit' and form.image_url %}
+          <div style="margin-top:10px; display: flex; gap: 20px;">
+            <div>
+              <p>Existing Image:</p>
+              <img src="{{ form.image_url }}" style="width:180px;border:1px solid #ccc;border-radius:6px;">
+              <br>
+              <button type="button" id="deleteImageBtn" class="btn btn-danger" style="margin-top:6px;">Delete Image</button>
+            </div>
+
+            <div>
+              <p>New Image Preview:</p>
+              <img id="previewImage" style="width:180px; border:1px solid #ccc; border-radius:6px; display:none;">
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Headline input -->
+      <div>
+        <label>Headline</label>
+        <input type="text" name="headline" value="{{ form.headline or '' }}">
+      </div>
+
+      <!-- Subhead input -->
+      <div>
+        <label>Subhead</label>
+        <input type="text" name="subhead" value="{{ form.subhead or '' }}">
+      </div>
+
+      <!-- CTA Text input -->
+      <div>
+        <label>Call-to-Action (CTA) Text</label>
+        <input type="text" name="cta_text" value="{{ form.cta_text or '' }}">
+      </div>
+
+      <!-- CTA URL input -->
+      <div>
+        <label>CTA URL</label>
+        <input type="text" name="cta_url" value="{{ form.cta_url or '' }}">
+      </div>
+
+      <!-- Sort Order input -->
+      <div>
+        <label>Sort Order</label>
+        <input type="number" name="sort_order" value="{{ form.sort_order }}" required>
+      </div>
+
+      <!-- Published Select -->
+      <div>
+        <label>Published</label>
+        <select name="published">
+          <option value="Yes" {% if form.published == 'Yes' %}selected{% endif %}>Yes</option>
+          <option value="No"  {% if form.published == 'No'  %}selected{% endif %}>No</option>
+        </select>
+      </div>
+
+      <!-- Active Select -->
+      <div>
+        <label>Active</label>
+        <select name="is_active">
+          <option value="true" {% if form.is_active %}selected{% endif %}>Yes</option>
+          <option value="false" {% if not form.is_active %}selected{% endif %}>No</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save</button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <!-- Include the external JS file -->
+  <script src="{{ url_for('static', path='js/admin/ops/banner.js') }}" defer></script>
+{% endblock %}

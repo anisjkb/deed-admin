@@ -1,0 +1,70 @@
+/* frontend/static/CSS/style.css */
+body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background: #f4f6f8;
+    color: #333;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1f2937;
+    padding: 0.8rem 2rem;
+    color: #fff;
+}
+.navbar .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+}
+.nav-links li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+}
+.nav-links li a:hover {
+    color: #facc15;
+}
+
+/* Landing Header */
+.landing-header {
+    text-align: center;
+    margin: 4rem auto;
+}
+.landing-header h1 {
+    font-size: 3rem;
+    color: #1f2937;
+}
+.landing-header p {
+    font-size: 1.2rem;
+    margin: 1rem 0;
+}
+.btn-primary {
+    background-color: #2563eb;
+    color: #fff;
+    padding: 0.8rem 1.5rem;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 500;
+}
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background: #1f2937;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}

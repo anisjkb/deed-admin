@@ -1,0 +1,29 @@
+{# admin/shared/menu_macros.html
+   Safe icon rendering for dynamic menu items:
+   - Forces Font Awesome "fas" prefix
+   - Applies base .menu-icon class (size/align from CSS)
+   - Allows only whitelisted color utility tokens from DB's icon_css
+   - Ignores any inline CSS attempts (e.g., "color:#fff" / "font-size:18px")
+#}
+{% macro menu_icon(icon, icon_css) -%}
+  {# Normalize icon class — DB should store like "fa-users" (no "fas" prefix) #}
+  {% set fa = (icon or '') | replace('fas ', '') | trim %}
+
+  {# Whitelist of safe color utility tokens you support in CSS #}
+  {% set allowed = [
+    'icon-cyan-300', 'icon-cyan-400',
+    'icon-violet-400', 'icon-emerald-400',
+    'icon-amber-400'
+  ] %}
+
+  {# Split DB-provided icon_css into tokens, keep only allowed #}
+  {% set tokens = (icon_css or '') .split() %}
+  {% set safe = [] %}
+  {% for t in tokens %}
+    {% if t in allowed %}
+      {% set _ = safe.append(t) %}
+    {% endif %}
+  {% endfor %}
+
+  <i class="fas {{ fa }} menu-icon {{ ' '.join(safe) }}"></i>
+{%- endmacro %}

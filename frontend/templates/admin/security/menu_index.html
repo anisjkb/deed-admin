@@ -1,0 +1,108 @@
+{% extends "admin/master.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/admin/security/menu.css') }}?v={{ static_version }}">
+{% endblock %}
+{% block content %}
+
+<div class="menu-admin">
+  <div class="page-head">
+    <h3>Menus</h3>
+    <div class="actions">
+      {% if perms.create %}
+        <a href="/admin/menus/new" class="btn btn-primary"><i class="fas fa-plus"></i> New Menu</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <form method="get" action="/admin/menus" class="search-bar">
+    <input type="text" name="q" placeholder="Search id/name/url/status" value="{{ q }}">
+    <input type="hidden" name="size" value="{{ size }}">
+    <button class="btn" aria-label="Search"><i class="fas fa-search"></i></button>
+  </form>
+
+  {% if flashes and flashes|length %}
+    <div class="flash-stack">
+      {% for f in flashes %}
+        <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Menu ID</th>
+            <th>Name</th>
+            <th>Parent</th>
+            <th>Order</th>
+            <th>URL</th>
+            <th>Icon</th>
+            <th>Active</th>
+            <th>Status</th>
+            {% if perms.edit or perms.delete %}
+              <th style="width:130px;">Actions</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr>
+            <td><code>{{ r.menu_id }}</code></td>
+            <td>{{ r.menu_name or '' }}</td>
+            <td>{{ r.parent_id or '0' }}</td>
+            <td>{{ r.menu_order or 0 }}</td>
+            <td class="truncate" title="{{ r.url or '' }}">{{ r.url or '' }}</td>
+            <td>
+              {% if r.font_awesome_icon %}
+                <i class="fas {{ r.font_awesome_icon }}"></i> {{ r.font_awesome_icon }}
+              {% endif %}
+            </td>
+            <td>{{ r.active_flag }}</td>
+            <td>{{ r.status }}</td>
+            {% if perms.edit or perms.delete %}
+            <td class="actions">
+              {% if perms.edit %}
+                <a class="btn btn-xs" href="/admin/menus/{{ r.menu_id }}/edit" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </a>
+              {% endif %}
+              {% if perms.delete %}
+                <form method="post" action="/admin/menus/{{ r.menu_id }}/delete"
+                      class="inline delete-form delete-confirm"
+                      message-confirm="Are you sure you want to delete '{{ r.menu_name }}'?"
+                      style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}"/>
+                  <button type="submit" class="btn btn-xs btn-danger" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+            {% endif %}
+          </tr>
+          {% else %}
+          <tr>
+            {% if perms.edit or perms.delete %}
+              <td colspan="9" class="muted">No menus found.</td>
+            {% else %}
+              <td colspan="8" class="muted">No menus found.</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if pages > 1 %}
+  <nav class="pagination" aria-label="Pagination">
+    {% for p in range(1, pages+1) %}
+      <a class="page {{ 'active' if p == page }}" href="/admin/menus?page={{ p }}&size={{ size }}{% if q %}&q={{ q }}{% endif %}">{{ p }}</a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+</div>
+
+{% endblock %}

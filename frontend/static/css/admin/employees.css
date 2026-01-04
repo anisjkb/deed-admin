@@ -1,0 +1,303 @@
+/* =========================================================
+   EMPLOYEE FORM – PREMIUM ADMIN UI
+   ========================================================= */
+
+/* -----------------------------
+   Page wrapper
+------------------------------ */
+.emp-page {
+  display: grid;
+  gap: 16px;
+}
+
+/* -----------------------------
+   Header
+------------------------------ */
+.emp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.emp-head h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+
+.emp-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted, #98a2b3);
+}
+
+.emp-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* -----------------------------
+   Card container
+------------------------------ */
+.emp-card {
+  padding: 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid var(--line, rgba(255,255,255,.08));
+  box-shadow: 0 20px 40px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+/* -----------------------------
+   Section headers
+------------------------------ */
+.emp-section-title {
+  display: flex;
+  align-items: center;
+  margin: 14px 0 10px;
+  gap: 10px;
+}
+
+.emp-section-title h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emp-section-title h4 i {
+  color: var(--accent, #7c9cff);
+}
+
+.emp-section-title .hint {
+  font-size: 12px;
+  color: var(--muted, #98a2b3);
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+.emp-section-title::after {
+  content: "";
+  display: block;
+  flex: 1;
+  height: 1px;
+  margin-left: 14px;
+  background: linear-gradient(to right, rgba(255,255,255,.15), transparent);
+}
+
+/* -----------------------------
+   Grid layout
+------------------------------ */
+.emp-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+  .emp-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 720px) {
+  .emp-grid { grid-template-columns: 1fr; }
+}
+
+/* Column spans */
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+
+@media (max-width: 1100px) {
+  .span-3 { grid-column: span 2; }
+}
+@media (max-width: 720px) {
+  .span-2, .span-3 { grid-column: span 1; }
+}
+
+/* -----------------------------
+   Form fields
+------------------------------ */
+.emp-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--muted, #98a2b3);
+}
+
+.emp-field input,
+.emp-field select,
+.emp-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--line, rgba(255,255,255,.12));
+  color: var(--text, #e5e7eb);
+  transition: all .2s ease;
+}
+
+.emp-field textarea { resize: vertical; }
+
+.emp-field input:focus,
+.emp-field select:focus,
+.emp-field textarea:focus {
+  outline: none;
+  border-color: var(--accent, #7c9cff);
+  box-shadow: 0 0 0 1px rgba(124,156,255,.25), 0 0 0 4px rgba(124,156,255,.12);
+  background: rgba(255,255,255,.06);
+}
+
+/* Readonly (single clean version) */
+.emp-field input[readonly],
+.emp-field input.is-readonly {
+  opacity: .65;
+  background: rgba(0,0,0,.03);
+  cursor: not-allowed;
+}
+
+.emp-field input[readonly]:focus,
+.emp-field input.is-readonly:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Helper text */
+.emp-help {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: #c3304d;
+}
+
+/* optional: dim help text too when readonly input right before it */
+.emp-field input[readonly] + .emp-help,
+.emp-field input.is-readonly + .emp-help {
+  opacity: .75;
+}
+
+/* -----------------------------
+   Upload layout (left input + right preview/actions)
+------------------------------ */
+.emp-upload {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+  align-items: start;
+}
+
+/* Optional improvement: give right side a bit more room on big screens */
+@media (min-width: 1100px) {
+  .emp-upload {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .emp-upload {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ✅ FIX: Buttons always side-by-side */
+.emp-upload-actions{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.emp-upload-actions .btn{
+  width: 100% !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* If screen is extremely narrow, stack them */
+@media (max-width: 420px){
+  .emp-upload-actions{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* -----------------------------
+   Preview grid (Existing + New)
+------------------------------ */
+.emp-preview-grid {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.emp-photo-preview {
+  width: 112px;
+}
+
+.emp-photo-preview .tag {
+  font-size: 11px;
+  color: var(--muted, #98a2b3);
+  margin-bottom: 6px;
+}
+
+.emp-photo-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--line, rgba(255,255,255,.12));
+  box-shadow: 0 10px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  display: block;
+  background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+}
+
+.emp-photo-img.is-placeholder {
+  background:
+    linear-gradient(45deg, rgba(255,255,255,.07) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,.07) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,.07) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,.07) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
+
+/* -----------------------------
+   Footer actions
+------------------------------ */
+.emp-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line, rgba(255,255,255,.12));
+}
+
+.emp-footer .info {
+  font-size: 12px;
+  color: var(--muted, #98a2b3);
+}
+
+/* -----------------------------
+   Buttons polish
+------------------------------ */
+.btn-primary {
+  box-shadow: 0 6px 20px rgba(124,156,255,.35), inset 0 1px 0 rgba(255,255,255,.2);
+}
+
+.btn-back { opacity: .9; }
+.btn-back:hover { opacity: 1; }
+
+/* -----------------------------
+   Small screens tweaks
+------------------------------ */
+@media (max-width: 720px) {
+  .emp-head h3 { font-size: 18px; }
+}

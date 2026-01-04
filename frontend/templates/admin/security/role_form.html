@@ -1,0 +1,54 @@
+{% extends "admin/master.html" %}
+
+{% block title %}{{ 'Create Role' if mode == 'create' else 'Edit Role ' ~ form.get('role_id') }}{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>{{ 'Create Role' if mode == 'create' else 'Edit Role ' ~ form.get('role_id') }}</h3>
+  <a href="/admin/roles" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<form method="post" action="{{ '/admin/roles' if mode == 'create' else '/admin/roles/' ~ form.get('role_id') }}" class="form-card">
+  <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}"/>
+
+  <div class="grid">
+    <div>
+      <label>Role ID *</label>
+      <input name="role_id" value="{{ form.get('role_id','') }}" {% if mode == 'edit' %}readonly{% endif %} required>
+    </div>
+    <div>
+      <label>Role Name *</label>
+      <input name="role_name" value="{{ form.get('role_name','') }}" required>
+    </div>
+    <div>
+      <label>Status</label>
+      <select name="status">
+        <option value="active"   {{ 'selected' if (form.get('status','active')=='active') }}>active</option>
+        <option value="inactive" {{ 'selected' if (form.get('status')=='inactive') }}>inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">
+      {{ 'Create' if mode == 'create' else 'Update' }}
+    </button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,95 @@
+{# frontend/templates/admin/employees/index.html #}
+{% extends "admin/master.html" %}
+{% block title %}Manage Employees{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Employees</h3>
+  {% if perms.create %}
+    <a class="btn btn-primary" href="/admin/employees/new">
+      <i class="fas fa-plus"></i> New Employee
+    </a>
+  {% endif %}
+</div>
+
+<form class="search-bar" method="get" action="/admin/employees">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search id/name/mobile/email/status">
+  
+  <select name="emp_type" style="max-width:200px;">
+    <option value="all" {{ 'selected' if selected_emp_type == 'all' }}>All Types</option>
+    {% for t in emp_types %}
+      <option value="{{ t }}" {{ 'selected' if selected_emp_type == t }}>{{ t }}</option>
+    {% endfor %}
+  </select>
+
+  <button class="btn" type="submit" aria-label="Search">
+    <i class="fas fa-search"></i>
+  </button>
+</form>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width:160px;">Employee ID</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Emp Type</th>
+        <th>Status</th>
+        <th class="table-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td><code>{{ r.emp_id }}</code></td>
+        <td class="wrap">{{ r.emp_name }}</td>
+        <td class="nowrap">{{ r.mobile or '' }}</td>
+        <td class="nowrap">{{ r.emp_type or '' }}</td>
+        <td class="nowrap">{{ r.status }}</td>
+        <td class="actions">
+          {% if perms.edit %}
+            <a class="btn btn-xs" href="/admin/employees/{{ r.emp_id }}/edit" title="Edit">
+              <i class="fas fa-edit"></i>
+            </a>
+          {% endif %}
+          {% if perms.delete %}
+            <form method="post"
+                  action="/admin/employees/{{ r.emp_id }}/delete"
+                  class="delete-confirm"
+                  message-confirm="Are you sure you want to delete employee '{{ r.emp_name }}' ({{ r.emp_id }})?"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+              <button class="btn btn-xs btn-danger" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="muted">No employees found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="pagination">
+  {% for p in range(1, pages+1) %}
+    <a class="page {{ 'active' if p==page }}"
+       href="/admin/employees?page={{p}}&size={{size}}{% if q %}&q={{ q }}{% endif %}{% if selected_emp_type %}&emp_type={{ selected_emp_type }}{% endif %}">
+      {{ p }}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

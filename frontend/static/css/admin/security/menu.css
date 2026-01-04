@@ -1,0 +1,96 @@
+/* frontend/static/css/admin/security/menu.css */
+/* ===== Menu admin pages (list + form) ===== */
+
+.menu-admin .page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.menu-admin .actions .btn { padding: 8px 12px; }
+
+/* Cards & tables (light look but non-invasive) */
+.menu-admin .card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px;
+}
+.menu-admin .table { width: 100%; border-collapse: collapse; }
+.menu-admin .table th, 
+.menu-admin .table td {
+  padding: 10px 12px;
+  border-bottom: 1px dashed #e5e7eb;
+  vertical-align: middle;
+}
+.menu-admin .nowrap { white-space: nowrap; }
+.menu-admin .truncate { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Buttons only inside menu-admin scope, so they don’t override global .btn */
+.menu-admin .btn { padding: 8px 12px; border-radius: 8px; text-decoration: none; cursor: pointer; }
+.menu-admin .btn-primary { background: #4f7cff; color: #fff; border: 1px solid #3e66db; }
+.menu-admin .btn-xs { padding: 6px 8px; }
+.menu-admin .btn-danger { background: #e11d48; color: #fff; border: 1px solid #be123c; }
+
+/* Alerts (form-local) */
+.menu-admin .alert { margin: 10px 0; padding: 8px 10px; border-radius: 8px; }
+.menu-admin .alert-danger { background: #ffe7ea; color: #8b1d26; border: 1px solid #f5c2c7; }
+
+/* Search */
+.menu-admin .search-bar { display: flex; gap: 8px; margin: 10px 0 16px; }
+.menu-admin .search-bar input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+}
+
+/* Pagination */
+.menu-admin .pagination { margin-top: 12px; }
+.menu-admin .page {
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin-right: 6px;
+  text-decoration: none;
+  color: #111827;
+  background: #ffffff;
+}
+.menu-admin .page.active { background: #4f7cff; color: #fff; border-color: #3e66db; }
+
+/* Form */
+.menu-admin .form-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 10px;
+}
+.menu-admin .grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.menu-admin label { display: block; margin-bottom: 4px; color: #374151; }
+.menu-admin input, 
+.menu-admin select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+}
+.menu-admin .form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .menu-admin .grid { grid-template-columns: 1fr; }
+  .menu-admin .truncate { max-width: 100%; }
+}

@@ -1,0 +1,121 @@
+{% extends "admin/master.html" %}
+
+{% block title %}Edit Rights — {{ role.role_id }}{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Edit Rights — Role {{ role.role_id }} ({{ role.role_name }})</h3>
+  <a href="/admin/rights" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+
+  {# one hidden form per menu row; inputs/buttons reference it via form="..." #}
+  {% for row in rights_rows %}
+    {% set m = row.menu %}
+    {% set r = row.rights %}
+
+    <form id="frm-{{ m.menu_id }}" method="post" action="/admin/rights/update/{{ role.role_id }}" style="display:none;">
+      <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+      <input type="hidden" name="menu_id" value="{{ m.menu_id }}">
+      {# the selects are NOT here; they sit in the table cells and point to this form #}
+    </form>
+  {% endfor %}
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Menu ID</th>
+        <th>Menu Name</th>
+        <th>Create</th>
+        <th>View</th>
+        <th>Edit</th>
+        <th>Delete</th>
+        <th>Status</th>
+        <th class="table-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rights_rows %}
+        {% set m = row.menu %}
+        {% set r = row.rights %}
+        <tr>
+          <td>{{ m.menu_id }}</td>
+          <td class="wrap">{{ m.menu_name }}</td>
+
+          <td class="nowrap">
+            <select name="create_permit" form="frm-{{ m.menu_id }}">
+              <option value="N" {{ 'selected' if (not r or r.create_permit != 'Y') }}>N</option>
+              <option value="Y" {{ 'selected' if (r and r.create_permit == 'Y') }}>Y</option>
+            </select>
+          </td>
+
+          <td class="nowrap">
+            <select name="view_permit" form="frm-{{ m.menu_id }}">
+              <option value="N" {{ 'selected' if (not r or r.view_permit != 'Y') }}>N</option>
+              <option value="Y" {{ 'selected' if (r and r.view_permit == 'Y') }}>Y</option>
+            </select>
+          </td>
+
+          <td class="nowrap">
+            <select name="edit_permit" form="frm-{{ m.menu_id }}">
+              <option value="N" {{ 'selected' if (not r or r.edit_permit != 'Y') }}>N</option>
+              <option value="Y" {{ 'selected' if (r and r.edit_permit == 'Y') }}>Y</option>
+            </select>
+          </td>
+
+          <td class="nowrap">
+            <select name="delete_permit" form="frm-{{ m.menu_id }}">
+              <option value="N" {{ 'selected' if (not r or r.delete_permit != 'Y') }}>N</option>
+              <option value="Y" {{ 'selected' if (r and r.delete_permit == 'Y') }}>Y</option>
+            </select>
+          </td>
+
+          <td class="nowrap">
+            <select name="status" form="frm-{{ m.menu_id }}">
+              <option value="active"   {{ 'selected' if (not r or r.status == 'active') }}>active</option>
+              <option value="inactive" {{ 'selected' if (r and r.status == 'inactive') }}>inactive</option>
+            </select>
+          </td>
+
+          <td class="actions">
+            <button class="btn btn-xs btn-primary" type="submit" form="frm-{{ m.menu_id }}" title="Save">
+              <i class="fas fa-save"></i>
+            </button>
+
+            {% if r %}
+              <form method="post" action="/admin/rights/remove/{{ role.role_id }}"
+                class="delete-confirm" 
+                message-confirm="Are you sure you want to remove rights for menu '{{ m.menu_name }}'?" 
+                style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+                <input type="hidden" name="menu_id" value="{{ m.menu_id }}">
+                <button class="btn btn-xs btn-danger" type="submit" title="Remove">
+                  <i class="fas fa-times"></i>
+                </button>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="muted">No menus found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="form-actions">
+    <a class="btn" href="/admin/rights"><i class="fas fa-arrow-left"></i> Back</a>
+  </div>
+</div>
+{% endblock %}

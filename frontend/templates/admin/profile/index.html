@@ -1,0 +1,126 @@
+{% extends "admin/master.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+{# ---- base objects ---- #}
+{% set u = user or current_user %}
+{% set nm = (emp.emp_name if emp else (u.login_id or "")) %}
+{% set avatar_url = (emp.photo_url if emp and emp.photo_url else "") %}
+{% set role_name = (role.role_name if role else u.role_id) %}
+
+{# ---- status mapping: codes -> readable & css slug ---- #}
+{% set _ust = (u.status or '')|upper %}
+{% set status_display = (
+    'Active' if _ust in ['A','ACTIVE'] else
+    'Inactive' if _ust in ['I','INACTIVE'] else
+    (_ust|capitalize if _ust else 'Active')
+) %}
+{% set status_slug = ('active' if status_display == 'Active' else 'inactive') %}
+
+<div class="page-head">
+  <h3>My Profile</h3>
+</div>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="profile">
+  <!-- Header / Identity -->
+  <section class="profile-header card">
+    <div class="profile-identity">
+      <div class="avatar-wrap">
+        {% if avatar_url %}
+          <img class="avatar" src="{{ avatar_url }}" alt="{{ nm }} avatar">
+        {% else %}
+          {% set initials = (nm.strip().split(' ')[0][:1] ~ (nm.strip().split(' ')[1][:1] if nm.strip().count(' ') >= 1 else ''))|upper %}
+          <div class="avatar avatar-fallback" aria-label="avatar">{{ initials or (u.login_id[:2] | upper) }}</div>
+        {% endif %}
+      </div>
+
+      <div class="who">
+        <h2 class="name">{{ nm }}</h2>
+        <div class="role-line">
+          <span class="role-chip"><i class="fas fa-user-shield"></i> {{ role_name }}</span>
+          <span class="status-badge status-{{ status_slug }}">{{ status_display }}</span>
+        </div>
+        <div class="id-line">
+          <span><i class="fas fa-id-badge"></i> Login: <code>{{ u.login_id }}</code></span>
+          {% if u.emp_id %}<span class="pipe">|</span><span><i class="fas fa-hashtag"></i> Emp ID: <code>{{ u.emp_id }}</code></span>{% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Grid -->
+  <section class="profile-grid">
+    <!-- Account -->
+    <div class="card profile-card">
+      <div class="card-head">
+        <h4><i class="fas fa-user-circle"></i> Account</h4>
+      </div>
+      <dl class="meta-list">
+        <div><dt>Login</dt><dd><code>{{ u.login_id }}</code></dd></div>
+        <div><dt>Role</dt><dd>{{ role_name }}</dd></div>
+        <div><dt>Status</dt><dd><span class="status-badge status-{{ status_slug }}">{{ status_display }}</span></dd></div>
+        {% if u.email %}<div><dt>Email</dt><dd>{{ u.email }}</dd></div>{% endif %}
+        {% if u.create_dt %}<div><dt>Member Since</dt><dd>{{ u.create_dt.strftime('%d %b %Y') }}</dd></div>{% endif %}
+      </dl>
+    </div>
+
+    <!-- Employee -->
+    <div class="card profile-card">
+      <div class="card-head">
+        <h4><i class="fas fa-id-card-alt"></i> Employee</h4>
+      </div>
+      {% if emp %}
+        <dl class="meta-list">
+          <div><dt>Employee</dt><dd>{{ emp.emp_name }}</dd></div>
+          {% if emp.gender %}<div><dt>Gender</dt><dd>{{ emp.gender }}</dd></div>{% endif %}
+          {% if emp.dob %}<div><dt>Date of Birth</dt><dd>{{ emp.dob.strftime('%d %b %Y') }}</dd></div>{% endif %}
+          {% if emp.mobile %}<div><dt>Mobile</dt><dd>{{ emp.mobile }}</dd></div>{% endif %}
+          {% if emp.email %}<div><dt>Work Email</dt><dd>{{ emp.email }}</dd></div>{% endif %}
+          {% if emp.join_date %}<div><dt>Join Date</dt><dd>{{ emp.join_date.strftime('%d %b %Y') }}</dd></div>{% endif %}
+          {% if desig %}<div><dt>Designation</dt><dd>{{ desig.desig_name }} <span class="muted">({{ emp.desig_id }})</span></dd></div>
+          {% elif emp.desig_id %}<div><dt>Designation</dt><dd>{{ emp.desig_id }}</dd></div>{% endif %}
+          {% if emp.blood_group %}<div><dt>Blood Group</dt><dd>{{ emp.blood_group }}</dd></div>{% endif %}
+          {% if emp.nid %}<div><dt>NID</dt><dd>{{ emp.nid }}</dd></div>{% endif %}
+          {% if emp.address %}<div class="full"><dt>Address</dt><dd>{{ emp.address }}</dd></div>{% endif %}
+          {% if emp.emergency_phone %}<div><dt>Emergency Phone</dt><dd>{{ emp.emergency_phone }}</dd></div>{% endif %}
+        </dl>
+      {% else %}
+        <div class="empty muted">No employee profile is linked to this account.</div>
+      {% endif %}
+    </div>
+
+    <!-- Organization -->
+    <div class="card profile-card">
+      <div class="card-head">
+        <h4><i class="fas fa-sitemap"></i> Organization</h4>
+      </div>
+      <dl class="meta-list">
+        {% if group %}<div><dt>Group</dt><dd>{{ group.group_name }} <span class="muted">({{ group.group_id }})</span></dd></div>{% endif %}
+        {% if org %}<div><dt>Organization</dt><dd>{{ org.org_name }} <span class="muted">({{ org.org_id }})</span></dd></div>{% endif %}
+        {% if zone %}<div><dt>Zone</dt><dd>{{ zone.zone_name }} <span class="muted">({{ zone.zone_id }})</span></dd></div>{% endif %}
+        {% if branch %}<div><dt>Branch</dt><dd>{{ branch.br_name }} <span class="muted">({{ branch.br_id }})</span></dd></div>{% endif %}
+      </dl>
+    </div>
+
+    <!-- Security -->
+    <div class="card profile-card">
+      <div class="card-head">
+        <h4><i class="fas fa-shield-alt"></i> Security</h4>
+      </div>
+      <ul class="bullet">
+        <li>Two-step verification: <span class="muted">—</span></li>
+        <li>Active sessions: <span class="muted">—</span></li>
+        <li>Password last changed: <span class="muted">—</span></li>
+      </ul>
+    </div>
+  </section>
+</div>
+{% endblock %}

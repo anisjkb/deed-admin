@@ -1,0 +1,535 @@
+/* =========================================
+   common.css  (GLOBAL)
+   Purpose: Global styles for project
+   Used by: base.html, home.html, register.html, any non-auth page
+   -----------------------------------------
+   CHANGES FROM YOUR ORIGINAL:
+   • Moved auth-only styles to auth.css:
+     (.auth-container, .forgot-password-container, .social-login,
+      .input-error, .error, .forgot-links, .forgot-link, auth inputs/buttons)
+   • Removed duplicate/older hero & features rules and kept one consolidated set.
+   • Kept your palette (#1877f2) and layout.
+   • Added .btn base and .btn-secondary (non-breaking).
+========================================= */
+
+/* ===== Global Reset & Base ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f5f6fa;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ===== Header & Nav ===== */
+header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  transition: 0.3s;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 400;
+  transition: 0.3s;
+  font-size: medium;
+}
+
+nav ul li a:hover {
+  color: #1877f2;
+}
+
+/* ===== App Name beside Logo ===== */
+.logo-holder {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start; /* Ensure proper alignment of logo and app name */
+  max-width: 100%; /* Prevent logo-holder from expanding too wide */
+}
+
+.logo img {
+  height: 50px;  /* Set a fixed height for the logo */
+  max-width: 100%; /* Ensure logo doesn't stretch beyond container */
+  display: block;  /* Ensure the image is treated as a block-level element */
+}
+
+.app-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1e3a8a; /* brand color */
+  letter-spacing: 0.6px;
+  margin-top: -5px; /* subtle visual centering */
+  white-space: nowrap;
+}
+
+/* Responsive adjustment for mobile */
+@media (max-width: 768px) {
+  .app-name {
+    font-size: 1rem;
+    color: #333;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-name {
+    display: none; /* hide on very small screens if needed */
+  }
+}
+
+/* ===== Mobile Menu Toggle ===== */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.menu-toggle span {
+  display: block;
+  height: 3px;
+  width: 25px;
+  background-color: #333;
+  border-radius: 2px;
+}
+
+nav ul.show {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background-color: white;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+/* ===== Buttons (global) ===== */
+.btn { /* NEW base class (non-breaking) */
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+/* existing primary kept intact */
+.btn-primary {
+  display: inline-block;
+  padding: 10px 25px;
+  background-color: #1877f2;
+  color: white;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+  border: 1px solid #1877f2;
+}
+
+.btn-primary:hover { background-color: #145dbf; border-color: #145dbf; }
+
+/* NEW secondary (neutral) */
+.btn-secondary {
+  background-color: #ffffff;
+  color: #333;
+  border: 1px solid #ddd;
+}
+.btn-secondary:hover {
+  background-color: #e2dfdf;
+}
+
+/* ===== Third Attractive Button (btn_third) ===== */
+.btn-back {
+  display: inline-block;
+  padding: 5px;
+  background-color: #3242b6;
+  color: white;
+  border-radius: 30px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.4s ease;
+  box-shadow: 0 5px 15px rgba(255, 75, 92, 0.3);
+}
+
+/* Hover Effect */
+.btn-back:hover {
+  background-color: #475bf3;
+  border-color: #f23b4f;
+  transform: translateY(-5px); /* Creates a floating effect */
+  box-shadow: 0 10px 20px rgba(255, 75, 92, 0.5); /* Enhanced shadow on hover */
+}
+
+/* Focused state for accessibility */
+.btn-back:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 75, 92, 0.5); /* Subtle outline for focus state */
+}
+
+/* ===== Footer ===== */
+footer {
+  text-align: center;
+  padding: 20px 0;
+  background-color: #ffffff;
+  margin-top: 50px;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+}
+
+/* ===== Home Page: Hero (consolidated) ===== */
+.hero {
+  background: linear-gradient(135deg, #a7b0ba, #6e7c99);
+  color: white;
+  padding: 40px;
+}
+.hero .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: auto;
+}
+.hero-content {
+  flex: 1 1 500px;
+  margin-left: 20px;
+}
+.hero-content h1 {
+  font-size: 2.0rem;
+  margin-bottom: 10px;
+}
+.hero-content p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+.hero-image {
+  flex: 1 1 400px;
+  text-align: center;
+}
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 20px;
+}
+
+/* ===== Features (consolidated) ===== */
+.features {
+  padding: 60px 20px;
+  background-color: #f5f6fa;
+  text-align: center;
+}
+.features h2 {
+  font-size: 2rem;
+  margin-bottom: 40px;
+  color: #1877f2;
+}
+.feature-cards {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.feature-cards .card {
+  background-color: white;
+  flex: 1 1 250px;
+  border-radius: 12px;
+  padding: 30px 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.feature-cards .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+}
+.feature-cards .card img {
+  height: 60px;
+  margin-bottom: 15px;
+  transition: transform 0.3s; /* kept polished hover effect */
+}
+.feature-cards .card:hover img {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* ===== CTA (consolidated) ===== */
+.cta {
+  background-color: #1877f2;
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+  border-radius: 12px; /* retained rounded look from earlier */
+}
+.cta h2 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+.cta p {
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+}
+.cta .btn-primary {
+  background-color: white;
+  color: #1877f2;
+  padding: 15px 35px;
+  font-size: 1.1rem;
+  border-color: white;
+}
+.cta .btn-primary:hover {
+  background-color: #f2f2f2;
+  color: #145dbf;
+  border-color: #f2f2f2;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .hero .container { flex-direction: column-reverse; text-align: center; }
+  .hero-content { margin: 20px 0; }
+  .feature-cards { flex-direction: column; gap: 20px; }
+}
+
+@media (max-width: 768px) {
+  nav ul { display: none; flex-direction: column; gap: 10px; }
+  .menu-toggle { display: flex; }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 { font-size: 26px; }
+  .hero-content p { font-size: 16px; }
+  .cta h2 { font-size: 22px; }
+  .cta .btn-primary { padding: 12px 25px; font-size: 16px; }
+}
+
+/* Floating label input (animated placeholder → top-left) */
+.floating-field {
+  position: relative;
+  width: 100%;
+}
+
+.floating-field input {
+  width: 100%;
+  padding: 12px 15px;
+  padding-left: 15px;
+  padding-top: 18px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #fff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.floating-field label {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #888;
+  padding: 0 4px;
+  pointer-events: none;
+  transition: transform 0.3s ease, top 0.3s ease, font-size 0.3s ease, color 0.3s ease;
+  background: #fff;
+}
+
+.floating-field input:focus + label,
+.floating-field input:not(:placeholder-shown) + label {
+  top: -8px;
+  left: 10px;
+  transform: translateY(0);
+  font-size: 14px;
+  color: #1877f2;
+}
+
+.floating-field input:focus {
+  border-color: #1877f2;
+  box-shadow: 0 0 5px rgba(24,119,242,0.3);
+  outline: none;
+}
+
+@media (max-width: 480px) {
+  .floating-field input {
+    font-size: 14px;
+  }
+  .floating-field label {
+    font-size: 14px;
+  }
+}
+/* ==========================================================
+   GLOBAL DELETE CONFIRMATION MODAL
+   Professional + Fully Responsive
+   ========================================================== */
+
+.delete-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(2px);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.delete-modal-box {
+  background: #fff;
+  width: 380px;
+  max-width: 100%;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 8px 35px rgba(0,0,0,0.25);
+  animation: fadeScaleIn 0.23s ease-out;
+  text-align: center;
+}
+
+.delete-modal-box h3 {
+  margin: 0 0 12px;
+  font-size: 1.45rem;
+  color: #c62828;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.delete-modal-box p {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.delete-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.delete-actions .btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+/* Animation */
+@keyframes fadeScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+  .delete-modal-box {
+    width: 90%;
+    padding: 20px;
+  }
+  .delete-modal-box h3 {
+    font-size: 1.3rem;
+  }
+  .delete-modal-box p {
+    font-size: 0.95rem;
+  }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+  .delete-modal-box {
+    width: 100%;
+    padding: 18px;
+  }
+  .delete-modal-box h3 {
+    font-size: 1.2rem;
+  }
+  .delete-modal-box p {
+    font-size: 0.9rem;
+  }
+  .delete-actions .btn {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Add this to the existing common.css */
+
+/* Container for the brochure preview */
+.preview-container {
+  overflow: auto;
+  max-height: 400px;  /* Set the max height for the preview area */
+  margin-top: 20px;  /* Add space between the file input and preview */
+  border: 1px solid #ddd;
+  padding: 10px;
+  background-color: #f9f9f9;
+  display: none; /* Initially hidden */
+}
+
+/* Style for the toggle button */
+#toggleBrochurePreview {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  margin-bottom: 20px; /* Add some margin below the button */
+}
+
+#toggleBrochurePreview:hover {
+  background-color: #0056b3;
+}
+
+/* Style for the image or PDF preview inside the container */
+.preview-container img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+.preview-container object {
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensuring the preview and button do not overlap */
+.file-preview {
+  margin-bottom: 20px; /* Space between the preview and other content */
+}
+
+#newBrochurePreview {
+  margin-bottom: 20px; /* Add space below the preview area */
+}

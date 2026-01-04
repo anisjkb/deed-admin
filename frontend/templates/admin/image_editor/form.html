@@ -1,0 +1,188 @@
+{% extends "admin/master.html" %}
+
+{% block title %}Image Editor — Admin{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet"
+        href="{{ url_for('static', path='css/image_editor.css') }}?v={{ static_version }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h3>Professional Image Editor</h3>
+  <a href="/admin/awards" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to Awards
+  </a>
+</div>
+
+<div class="card image-editor-card">
+  <!-- Top: upload + drag & drop -->
+  <div class="editor-upload-row">
+    <div class="editor-upload-left">
+      <label class="editor-label">Choose Image</label>
+      <input type="file"
+             id="ie-file-input"
+             accept="image/jpeg,image/png,image/jpg"
+             multiple>
+      <small class="editor-hint">
+        Allowed: AVIF, JPG, PNG — Max 2 MB
+      </small>
+      <div class="editor-file-info">
+        File size: <span id="ie-file-size">0 KB</span>
+      </div>
+    </div>
+
+    <div class="editor-upload-right">
+      <div id="ie-dropzone" class="ie-dropzone">
+        <p>Drag &amp; drop image here, or use the file picker.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main layout: crop area + controls -->
+  <div class="image-editor-layout">
+    <!-- LEFT: main cropper workspace -->
+    <div class="editor-left">
+      <div class="ie-main-wrapper">
+        <div id="ie-main-area" class="ie-main-area">
+          <!-- This image is turned into a Cropper instance by JS -->
+          <img id="ie-image"
+               src=""
+               alt="Upload an image to start"
+               class="ie-image"
+               style="display:none;">
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="ie-toolbar">
+        <div class="ie-toolbar-group">
+          <button type="button" class="ie-btn" data-action="move" title="Move">
+            ⬍
+          </button>
+          <button type="button" class="ie-btn" data-action="crop" title="Crop">
+            ◼
+          </button>
+          <button type="button" class="ie-btn" data-action="reset" title="Reset">
+            ⟳
+          </button>
+        </div>
+
+        <div class="ie-toolbar-group">
+          <button type="button" class="ie-btn" data-action="zoom-in" title="Zoom In">
+            ＋
+          </button>
+          <button type="button" class="ie-btn" data-action="zoom-out" title="Zoom Out">
+            －
+          </button>
+          <label class="ie-zoom-label">
+            Zoom
+            <input type="range" id="ie-zoom-range" min="0.2" max="3" step="0.05" value="1">
+          </label>
+        </div>
+
+        <div class="ie-toolbar-group">
+          <button type="button" class="ie-btn" data-action="rotate-left" title="Rotate Left">
+            ↺ 90°
+          </button>
+          <button type="button" class="ie-btn" data-action="rotate-right" title="Rotate Right">
+            ↻ 90°
+          </button>
+          <button type="button" class="ie-btn" data-action="flip-h" title="Flip Horizontal">
+            ⇋
+          </button>
+          <button type="button" class="ie-btn" data-action="flip-v" title="Flip Vertical">
+            ⇵
+          </button>
+        </div>
+        <!-- Add this container for the message -->
+        <div id="messageContainer" style="margin-top:10px;"></div>
+
+<div class="ie-toolbar-group">
+  <button type="button" id="ie-clear-btn" class="ie-btn ie-btn-danger" title="Clear Image">
+    ✖ Clear
+  </button>
+  <button type="button" id="ie-download-btn" class="ie-btn ie-btn-primary" title="Download">
+    ⬇ Download
+  </button>
+</div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: preview, aspect ratios, filters, crop data -->
+    <div class="editor-right">
+
+      <!-- Preview -->
+      <section class="ie-panel">
+        <h4 class="ie-panel-title">Preview</h4>
+        <canvas id="ie-preview-canvas" class="ie-preview-canvas"></canvas>
+      </section>
+
+      <!-- Aspect ratios -->
+      <section class="ie-panel">
+        <h4 class="ie-panel-title">Aspect Ratio</h4>
+        <div class="ie-aspect-buttons">
+          <button type="button" class="ie-btn ie-btn-small" data-aspect="NaN">Free</button>
+          <button type="button" class="ie-btn ie-btn-small" data-aspect="1">1 : 1</button>
+          <button type="button" class="ie-btn ie-btn-small" data-aspect="4/3">4 : 3</button>
+          <button type="button" class="ie-btn ie-btn-small" data-aspect="16/9">16 : 9</button>
+          <button type="button" class="ie-btn ie-btn-small" data-aspect="2/3">2 : 3</button>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="ie-panel">
+        <h4 class="ie-panel-title">Adjustments</h4>
+
+        <div class="ie-slider-row">
+          <label for="ie-brightness">Brightness</label>
+          <input type="range" id="ie-brightness" min="50" max="150" value="100">
+        </div>
+
+        <div class="ie-slider-row">
+          <label for="ie-contrast">Contrast</label>
+          <input type="range" id="ie-contrast" min="50" max="150" value="100">
+        </div>
+
+        <div class="ie-slider-row">
+          <label for="ie-saturation">Saturation</label>
+          <input type="range" id="ie-saturation" min="0" max="200" value="100">
+        </div>
+
+        <div class="ie-slider-row">
+          <label for="ie-grayscale">Grayscale</label>
+          <input type="range" id="ie-grayscale" min="0" max="100" value="0">
+        </div>
+
+        <button type="button" id="ie-reset-filters" class="ie-btn ie-btn-small">
+          Reset Adjustments
+        </button>
+      </section>
+
+      <!-- Crop data -->
+      <section class="ie-panel">
+        <h4 class="ie-panel-title">Crop Data</h4>
+        <div class="ie-data-grid">
+          <label>X <input id="ie-data-x" type="number" readonly></label>
+          <label>Y <input id="ie-data-y" type="number" readonly></label>
+          <label>Width <input id="ie-data-width" type="number" readonly></label>
+          <label>Height <input id="ie-data-height" type="number" readonly></label>
+          <label>Rotate <input id="ie-data-rotate" type="number" readonly></label>
+          <label>ScaleX <input id="ie-data-scale-x" type="number" readonly></label>
+          <label>ScaleY <input id="ie-data-scale-y" type="number" readonly></label>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{{ url_for('static', path='js/admin/ops/image_editor.js') }}?v={{ static_version }}"
+          nonce="{{ request.state.csp_nonce }}"
+          defer></script>
+{% endblock %}

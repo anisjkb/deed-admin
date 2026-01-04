@@ -1,0 +1,78 @@
+{#frontend/templates/admin/awards/index.html#}
+{% extends "admin/master.html" %}
+
+{% block title %}Manage Awards{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Awards</h3>
+  <a class="btn btn-primary" href="/admin/awards/new">
+    <i class="fas fa-plus"></i> New Award
+  </a>
+</div>
+
+<form class="search-bar" method="get" action="/admin/awards">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search title or issuer">
+  <button class="btn" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+</form>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Title</th>
+        <th>Issuer</th>
+        <th>Year</th>
+        <th>Published</th>
+        <th>Order</th>
+        <th class="table-actions">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.title }}</td>
+        <td>{{ r.issuer }}</td>
+        <td>{{ r.year }}</td>
+        <td>{{ r.published }}</td>
+        <td>{{ r.displaying_order }}</td>
+        <td class="actions">
+          <a class="btn btn-xs" href="/admin/awards/{{ r.id }}/edit" title="Edit">
+            <i class="fas fa-edit"></i>
+          </a>
+          <form method="post" action="/admin/awards/{{ r.id }}/delete" class="delete-confirm" data-message="Delete this award including its media?" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+            <button class="btn btn-xs btn-danger" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">No awards found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="pagination">
+  {% for p in range(1, pages+1) %}
+    <a class="page {{ 'active' if p==page }}"
+       href="/admin/awards?page={{p}}&size={{size}}{% if q %}&q={{ q }}{% endif %}">
+      {{ p }}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

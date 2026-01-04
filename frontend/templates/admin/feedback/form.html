@@ -1,0 +1,81 @@
+{# frontend/templates/admin/feedback/form.html #}
+{% extends "admin/master.html" %}
+
+{% block title %}
+  {{ 'Create Feedback' if mode=='create' else title }}
+{% endblock %}
+
+{% block content %}
+
+<div class="page-head">
+  <h3>{{ 'Create Feedback' if mode=='create' else title }}</h3>
+  <a href="/admin/feedback" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+
+<form method="post"
+      action="{{ '/admin/feedback/new' if mode=='create' else ('/admin/feedback/' ~ form.id ~ '/edit') }}"
+      class="form-card">
+
+  <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+  <div class="grid">
+
+      <div>
+        <label>Name *</label>
+        <input type="text" name="name" value="{{ form.name or '' }}" required maxlength="120">
+      </div>
+
+      <div>
+        <label>Phone *</label>
+        <input type="text" name="phone" value="{{ form.phone or '' }}" required maxlength="40">
+      </div>
+
+      <div>
+        <label>Email</label>
+        <input type="email" name="email" value="{{ form.email or '' }}" maxlength="160">
+      </div>
+
+      <div style="grid-column: 1 / -1;">
+        <label>Message</label>
+        <textarea name="message" rows="5" style="width:100%;">{{ form.message or '' }}</textarea>
+      </div>
+
+      {% if mode == 'edit' and form.created_at %}
+      <div>
+        <label>Created At</label>
+        <input type="text" value="{{ form.created_at.strftime('%Y-%m-%d %H:%M') }}" disabled>
+      </div>
+      {% endif %}
+
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">
+      <i class="fas fa-save"></i> Save
+    </button>
+  </div>
+
+</form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{{ url_for('static', path='js/admin/ops/feedback.js') }}?v={{ static_version }}" defer></script>
+{% endblock %}

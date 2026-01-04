@@ -1,0 +1,88 @@
+{% extends "admin/master.html" %}
+{% block title %}{{ 'Create Organization' if mode=='create' else 'Edit Organization — ' ~ form.org_id }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>{{ 'Create Organization' if mode=='create' else ('Edit Organization — ' ~ form.org_id) }}</h3>
+  <a href="/admin/orgs" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card">
+  <form method="post"
+        action="{{ '/admin/orgs' if mode=='create' else ('/admin/orgs/' ~ form.org_id) }}"
+        class="form-card">
+    <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+    <div class="grid">
+      <div>
+        <label>Org ID</label>
+        <input type="text" name="org_id" value="{{ form.org_id or '' }}" readonly>
+      </div>
+
+      <div>
+        <label>Group</label>
+        <select name="group_id" id="groupSelect" {% if mode=='edit' %}disabled{% else %}required{% endif %}>
+          <option value="">-- Select Group --</option>
+          {% for g in groups %}
+          <option value="{{ g.group_id }}" {{ 'selected' if (form.group_id or '') == g.group_id }}>
+            {{ g.group_name }} - {{ g.group_id }}
+          </option>
+          {% endfor %}
+        </select>
+        {% if mode=='edit' %}
+          <input type="hidden" name="group_id" value="{{ form.group_id }}">
+        {% endif %}
+      </div>
+
+      <div>
+        <label>Org Name</label>
+        <input type="text" name="org_name" value="{{ form.org_name or '' }}" required>
+      </div>
+
+      <div>
+        <label>Address</label>
+        <input type="text" name="org_address" value="{{ form.org_address or '' }}">
+      </div>
+
+      <div>
+        <label>Logo (URL or path)</label>
+        <input type="text" name="org_logo" value="{{ form.org_logo or '' }}">
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select name="status">
+          <option value="active" {{ 'selected' if (form.status or 'active')=='active' }}>active</option>
+          <option value="inactive" {{ 'selected' if (form.status or '')=='inactive' }}>inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">
+        <i class="fas fa-save"></i> Save
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if mode == 'create' %}
+<script src="{{ url_for('static', path='js/admin/org/org_info.js') }}?v={{ static_version }}" defer></script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,79 @@
+{# templates/partials/_projects.html
+   Expects:
+   - items:        list of project objects (e.g., projects or featured_projects)
+   - form_action:  URL for the filter form action (e.g., request.path or "/projects")
+   - heading:      section heading text
+   - subheading:   optional subheading (can be "")
+   - category, ptype, location: preselected filter values (use "" if not present)
+   - show_actions: bool — whether to show “Explore / Schedule” on cards
+#}
+
+<section class="section container">
+  <header class="section-header">
+    <h2 class="h2">{{ heading }}</h2>
+    {% if subheading %}<p class="muted">{{ subheading }}</p>{% endif %}
+  </header>
+
+  <form method="get" action="{{ form_action }}" class="form filters-form" role="search">
+    <div>
+      <label class="sr-only" for="f-category">Category</label>
+      <select id="f-category" name="category">
+        <option value="" {{ 'selected' if not category }}>All</option>
+        <option value="ongoing"   {{ 'selected' if category=='ongoing' }}>Ongoing</option>
+        <option value="upcoming"  {{ 'selected' if category=='upcoming' }}>Upcoming</option>
+        <option value="completed" {{ 'selected' if category=='completed' }}>Completed</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="sr-only" for="f-type">Type</label>
+      <select id="f-type" name="type">
+        <option value="" {{ 'selected' if not ptype }}>Type</option>
+        <option value="residential" {{ 'selected' if ptype=='residential' }}>Residential</option>
+        <option value="commercial"  {{ 'selected' if ptype=='commercial' }}>Commercial</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="sr-only" for="f-location">Location</label>
+      <input id="f-location" type="text" name="location" placeholder="Enter location" value="{{ location or '' }}">
+    </div>
+
+    <div>
+      <button class="btn" type="submit">Search</button>
+    </div>
+  </form>
+
+  <div class="cards">
+    {% for p in items %}
+    <article class="card">
+      <a href="/projects/{{ p.slug }}" class="card-media">
+        <img
+          src="{{ (p.hero_image_url or '/static/images/projects/default.jpg') ~ ('?v=' ~ assetv) }}"
+          alt="{{ p.title }} hero"
+          loading="lazy"
+          width="1200"
+          height="800"
+          onerror="this.onerror=null;this.src='/static/images/projects/default.jpg?v={{ assetv }}';"
+        >
+      </a>
+      <div class="card-body">
+        <h3 class="h4"><a href="/projects/{{ p.slug }}">{{ p.title }}</a></h3>
+        <p class="muted">{{ p.location }} · {{ p.ptype.value|title }} · {{ p.status.value|title }}</p>
+        <p>{{ p.short_desc or '' }}</p>
+        <div class="progress">
+          <div class="bar" style="width: {{ p.progress_pct }}%"></div>
+          <span class="pct">{{ p.progress_pct }}%</span>
+        </div>
+
+        {% if show_actions %}
+        <div class="card-actions">
+          <a class="btn btn-secondary" href="/projects/{{ p.slug }}">Explore</a>
+          <a class="btn btn-outline" href="#schedule">Schedule</a>
+        </div>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>

@@ -1,0 +1,66 @@
+<!-- frontend/templates/home.html -->
+{% extends "base.html" %}
+{% block title %}Home · Deed Management System{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container">
+    <div class="hero-image">
+      <img src="{{ url_for('static', path='images/hero4.jpg') }}" alt="Deed Management Illustration">
+    </div>
+
+    <div class="hero-content">
+      <h1>Welcome to the Deed Management System</h1>
+      <p>Manage your property records and legal documents in one secure and intelligent platform.</p>
+      <a href="/login" class="btn btn-secondary">Login here</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script nonce="{{ request.state.csp_nonce }}">
+(function () {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const flag = (params.get("auth") || "").toLowerCase();
+    if (!flag) return;
+
+    // Clean URL so refresh doesn't re-trigger the modal
+    params.delete("auth");
+    const clean = window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+    window.history.replaceState({}, "", clean);
+
+    function toast(msg) {
+      try {
+        if (window.showToast) return window.showToast(msg);
+        if (window.Toast?.show) return window.Toast.show(msg);
+      } catch {}
+      console.warn(msg);
+    }
+
+    // Wait for deferred scripts (confirm.js + session-timeout.js)
+    window.addEventListener("load", () => {
+      if (window.SessionTimeout?.handleAuthFlag) {
+        window.SessionTimeout.handleAuthFlag(flag);
+        return;
+      }
+
+      // Fallback (rare)
+      if (flag === "expired") {
+        toast("Session expired. Redirecting to login…");
+        window.location.href = "/login";
+        return;
+      }
+      if (flag === "forbidden") {
+        toast("Access denied.");
+        window.location.href = "/";
+        return;
+      }
+    });
+  } catch (e) {
+    console.error("Auth flag bootstrap failed", e);
+  }
+})();
+</script>
+{% endblock %}

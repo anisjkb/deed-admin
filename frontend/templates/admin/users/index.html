@@ -1,0 +1,91 @@
+{% extends "admin/master.html" %}
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Users</h3>
+  {% if perms.create %}
+    <a class="btn btn-primary" href="/admin/users/new"><i class="fas fa-plus"></i> New User</a>
+  {% endif %}
+</div>
+
+<form class="search-bar" method="get" action="/admin/users">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search login/emp/name/role/email/status">
+  <button class="btn" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+</form>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card" style="padding:12px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Login ID</th>
+        <th>Employee ID</th>
+        <th>Employee Name</th>
+        <th style="width:80px;">Role</th>
+        <th>Email</th>
+        <th style="width:80px;">Status</th>
+        {% if perms.edit or perms.delete %}
+          <th class="table-actions" style="width:140px;">Actions</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="nowrap"><code>{{ r.login_id }}</code></td>
+        <td class="nowrap">{{ r.emp_id }}</td>
+        <td class="wrap">{{ r.emp_name or '' }}</td>
+        <td class="nowrap">{{ r.role_id }}</td>
+        <td class="wrap">{{ r.email or '' }}</td>
+        <td class="nowrap">{{ r.status }}</td>
+        {% if perms.edit or perms.delete %}
+        <td class="actions">
+          {% if perms.edit %}
+            <a class="btn btn-xs" href="/admin/users/{{ r.login_id }}/edit" title="Edit">
+              <i class="fas fa-edit"></i>
+            </a>
+          {% endif %}
+          {% if perms.delete %}
+            <form method="post"
+                  action="/admin/users/{{ r.login_id }}/delete"
+                  class="delete-confirm"
+                  message-confirm="Are you sure you want to delete user for employee '{{ r.emp_name or r.emp_id }}'?"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+              <button class="btn btn-xs btn-danger" title="Delete"><i class="fas fa-trash"></i></button>
+            </form>
+          {% endif %}
+        </td>
+        {% endif %}
+      </tr>
+      {% else %}
+      <tr>
+        {% if perms.edit or perms.delete %}
+          <td colspan="7" class="muted">No users found.</td>
+        {% else %}
+          <td colspan="6" class="muted">No users found.</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pages > 1 %}
+<div class="pagination">
+  {% for p in range(1, pages+1) %}
+    <a class="page {{ 'active' if p==page }}" href="/admin/users?page={{p}}&size={{size}}{% if q %}&q={{ q }}{% endif %}">
+      {{ p }}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

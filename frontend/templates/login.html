@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/auth.css') }}?v={{ static_version }}"/>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <h3>Login</h3>
+  <p id="errorMsg" class="error" aria-live="polite"></p>
+
+  <form id="loginForm" method="POST" novalidate autocomplete="on">
+    <!-- Username Input -->
+    <div class="floating-field">
+      <input
+        type="text"
+        id="logInId"
+        name="logInId"
+        placeholder=" "
+        autocomplete="logInId"
+        required
+      />
+      <label for="logInId">Login ID</label>
+    </div>
+    <small class="input-error" id="logInIdError"></small>
+
+    <!-- Password Input -->
+    <div class="floating-field">
+      <input
+        type="password"
+        id="password"
+        name="password"
+        placeholder=" "
+        autocomplete="current-password"
+        required
+      />
+      <label for="password">Password</label>
+    </div>
+    <small class="input-error" id="passwordError"></small>
+    <!-- Submit Button -->
+    <button type="submit" class="btn-primary">Log In</button>
+  </form>
+  
+  <!-- Forgot Password and Forgot Username links -->
+  <div class="forgot-links">
+    <a href="/forgot-password" class="forgot-link">Forgot Password?</a> | 
+    <a href="/forgot-username" class="forgot-link">Forgot Login ID?</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script nonce="{{ request.state.csp_nonce }}" src="{{ url_for('static', path='js/auth/token.js') }}?v={{ static_version }}" defer></script>
+<script nonce="{{ request.state.csp_nonce }}" src="{{ url_for('static', path='js/auth/login.js') }}?v={{ static_version }}" defer></script>
+{% endblock %}

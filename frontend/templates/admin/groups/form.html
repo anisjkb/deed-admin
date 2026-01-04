@@ -1,0 +1,72 @@
+{% extends "admin/master.html" %}
+{% block title %}{{ 'Create Group' if mode=='create' else 'Edit Group — ' ~ form.group_id }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>{{ 'Create Group' if mode=='create' else ('Edit Group — ' ~ form.group_id) }}</h3>
+  <a href="/admin/groups" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card">
+  <form method="post"
+        action="{{ '/admin/groups' if mode=='create' else ('/admin/groups/' ~ form.group_id) }}"
+        class="form-card">
+    <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+    <div class="grid">
+      <div>
+        <label>Group ID</label>
+        {# Stack input and refresh button; add a tiny utility class in CSS if you want them side-by-side #}
+        <input type="text" name="group_id" value="{{ form.group_id or '' }}" readonly>
+        {% if mode == 'create' %}
+        <button type="button" class="btn btn-xs" id="regenGroupId">Refresh</button>
+        {% endif %}
+      </div>
+
+      <div>
+        <label>Group Name</label>
+        <input type="text" name="group_name" value="{{ form.group_name or '' }}" required>
+      </div>
+
+      <div>
+        <label>Address</label>
+        <input type="text" name="group_address" value="{{ form.group_address or '' }}">
+      </div>
+
+      <div>
+        <label>Logo (URL or path)</label>
+        <input type="text" name="group_logo" value="{{ form.group_logo or '' }}">
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select name="status">
+          <option value="active" {{ 'selected' if (form.status or 'active')=='active' }}>active</option>
+          <option value="inactive" {{ 'selected' if (form.status or '')=='inactive' }}>inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if mode == 'create' %}
+<script src="{{ url_for('static', path='js/admin/org/group_info.js') }}?v={{ static_version }}" defer></script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+/* frontend/static/css/admin/feedback.css */
+
+/* Highlight unread rows softly */
+.unread-row {
+  background-color: #f7fbff;
+  font-weight: 500;
+}
+
+/* Small clickable badge beside unread IDs */
+.badge-unread {
+  display: inline-block;
+  background: #0d6efd;
+  color: #fff;
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 1px 6px;
+  margin-left: 4px;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.badge-unread:hover {
+  background: #084298;
+}

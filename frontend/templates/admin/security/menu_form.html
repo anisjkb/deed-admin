@@ -1,0 +1,88 @@
+{% extends "admin/master.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/admin/security/menu.css') }}?v={{ static_version }}">
+{% endblock %}
+{% block content %}
+
+<div class="menu-admin">
+  <h3>{{ 'New Menu' if mode == 'create' else 'Edit Menu ' ~ form.get('menu_id') }}</h3>
+
+  {% if flashes and flashes|length %}
+    <div class="flash-stack">
+      {% for f in flashes %}
+        <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" action="{{ '/admin/menus' if mode == 'create' else '/admin/menus/' ~ form.get('menu_id') }}" class="form-card">
+    <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}"/>
+
+    <div class="grid">
+      <div>
+        <label>Menu ID *</label>
+        <input name="menu_id" value="{{ form.get('menu_id','') }}" {% if mode == 'edit' %}readonly{% endif %} required>
+      </div>
+      <div>
+        <label>Menu Name</label>
+        <input name="menu_name" value="{{ form.get('menu_name','') }}">
+      </div>
+      <div>
+        <label>Parent</label>
+        <select name="parent_id">
+          <option value="0" {{ 'selected' if (form.get('parent_id','0')=='0') }}>Root (0)</option>
+          {% for p in parents %}
+            {% if p.menu_id != form.get('menu_id') %}
+            <option value="{{ p.menu_id }}" {{ 'selected' if (form.get('parent_id')==p.menu_id) }}>
+              {{ p.menu_id }} — {{ p.menu_name or '' }}
+            </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Is Parent?</label>
+        <select name="is_parents">
+          <option value="N" {{ 'selected' if (form.get('is_parents','N')=='N') }}>N</option>
+          <option value="Y" {{ 'selected' if (form.get('is_parents')=='Y') }}>Y</option>
+        </select>
+      </div>
+      <div>
+        <label>URL</label>
+        <input name="url" value="{{ form.get('url','') }}" placeholder="admin/route">
+      </div>
+      <div>
+        <label>Order</label>
+        <input type="number" name="menu_order" value="{{ form.get('menu_order',0) }}">
+      </div>
+      <div>
+        <label>FA Icon</label>
+        <input name="font_awesome_icon" value="{{ form.get('font_awesome_icon','') }}" placeholder="fa-home">
+      </div>
+      <div>
+        <label>Extra Icon CSS</label>
+        <input name="f_awesome_icon_css" value="{{ form.get('f_awesome_icon_css','') }}" placeholder="icon-cyan-400">
+      </div>
+      <div>
+        <label>Active?</label>
+        <select name="active_flag">
+          <option value="Y" {{ 'selected' if (form.get('active_flag','Y')=='Y') }}>Y</option>
+          <option value="N" {{ 'selected' if (form.get('active_flag')=='N') }}>N</option>
+        </select>
+      </div>
+      <div>
+        <label>Status</label>
+        <input name="status" value="{{ form.get('status','active') }}">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn" href="/admin/menus"><i class="fas fa-arrow-left"></i> Back</a>
+      <button class="btn btn-primary" type="submit">
+        <i class="fas fa-save"></i> {{ 'Create' if mode == 'create' else 'Update' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

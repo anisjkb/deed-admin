@@ -1,0 +1,78 @@
+{% extends "admin/master.html" %}
+{% block title %}{{ 'Create Zone' if mode=='create' else 'Edit Zone — ' ~ form.zone_id }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>{{ 'Create Zone' if mode=='create' else ('Edit Zone — ' ~ form.zone_id) }}</h3>
+  <a href="/admin/zones" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card">
+  <form method="post"
+        action="{{ '/admin/zones' if mode=='create' else ('/admin/zones/' ~ form.zone_id) }}"
+        class="form-card">
+    <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+    <div class="grid">
+      <div>
+        <label>Zone ID</label>
+        <input type="text" name="zone_id" value="{{ form.zone_id or '' }}" readonly>
+      </div>
+
+      <div>
+        <label>Organization</label>
+        <select name="org_id" id="orgSelect" {% if mode=='edit' %}disabled{% else %}required{% endif %}>
+          <option value="">-- Select Organization --</option>
+          {% for o in orgs %}
+          <option value="{{ o.org_id }}" {{ 'selected' if (form.org_id or '') == o.org_id }}>
+            {{ o.org_name }} - {{ o.org_id }}
+          </option>
+          {% endfor %}
+        </select>
+        {% if mode=='edit' %}
+          <input type="hidden" name="org_id" value="{{ form.org_id }}">
+        {% endif %}
+      </div>
+
+      <div>
+        <label>Zone Name</label>
+        <input type="text" name="zone_name" value="{{ form.zone_name or '' }}" required>
+      </div>
+
+      <div>
+        <label>Address</label>
+        <input type="text" name="zone_address" value="{{ form.zone_address or '' }}">
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select name="status">
+          <option value="active" {{ 'selected' if (form.status or 'active')=='active' }}>active</option>
+          <option value="inactive" {{ 'selected' if (form.status or '')=='inactive' }}>inactive</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if mode == 'create' %}
+<script src="{{ url_for('static', path='js/admin/org/zone_info.js') }}?v={{ static_version }}" defer></script>
+{% endif %}
+{% endblock %}

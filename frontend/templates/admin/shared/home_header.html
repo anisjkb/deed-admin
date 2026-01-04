@@ -1,0 +1,78 @@
+<!-- frontend/templates/admin/shared/home_header.html -->
+<div class="header-section">
+  <div class="logo-holder">
+    <img src="{{ url_for('static', path='images/deed-logo-light.svg') }}" alt="Deed Logo">
+    <div class="app-name">Deed Management System (DMS)</div>
+  </div>
+
+  <div class="service-menu-section">
+    <!-- Search -->
+    <div class="searching-section">
+      <input type="text" placeholder="Search">
+    </div>
+
+    {% if can_view_feedback %}
+    <!-- Notifications (unread feedback) -->
+    <div class="notification-section">
+      <button class="notification-btn" aria-label="Notifications" type="button">
+        <i class="fas fa-bell"></i>
+        {% if (notif_feedback_unread_count or 0) > 0 %}
+          <span class="notification-badge">{{ notif_feedback_unread_count }}</span>
+        {% endif %}
+      </button>
+
+      <div class="notification-dropdown">
+        <div class="dropdown-header">
+          <span>Notifications</span>
+          <span class="close-btn" role="button" tabindex="0" aria-label="Close">×</span>
+        </div>
+
+        <div class="dropdown-body">
+          {% if notif_feedback_unread_oldest and notif_feedback_unread_oldest|length %}
+            {% for f in notif_feedback_unread_oldest %}
+              <a class="notif-item" href="/admin/feedback/{{ f.id }}/edit">
+                <div class="notif-title">
+                  <span>{{ f.name or 'Anonymous' }}</span>
+                  {% if f.phone %}<span class="muted">({{ f.phone }})</span>{% endif %}
+                </div>
+
+                {% if f.message %}
+                  <div class="notif-sub">
+                    {{ f.message[:80] }}{% if f.message|length > 80 %}…{% endif %}
+                  </div>
+                {% endif %}
+
+                <div class="notif-time">
+                  {{ f.created_at.strftime('%Y-%m-%d %H:%M') if f.created_at else '' }}
+                </div>
+              </a>
+            {% endfor %}
+          {% else %}
+            <p class="muted" style="margin:8px 12px;">No unread feedback.</p>
+          {% endif %}
+        </div>
+
+        <div class="dropdown-footer">
+          <a href="/admin/feedback" class="view-all">
+            View all feedback
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Profile -->
+    <div class="profile-holder">
+      <img src="/static/images/profile_pic.png" alt="Profile" class="profile-img">
+      <button class="dropbtn" type="button">
+        {{ display_name or current_user.login_id }}
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div class="dropdown-content">
+        <a href="/profile"><i class="fas fa-user"></i> My Profile</a>
+        <a href="/change-password"><i class="fas fa-user-lock"></i> Change Password</a>
+        <a href="#" id="logoutLink"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+  </div>
+</div>

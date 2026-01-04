@@ -1,0 +1,55 @@
+{# templates/partials/_schedule_meeting.html #}
+<section id="schedule" class="section">
+  <div class="container">
+    <div class="meeting-grid">
+      <!-- Left: image -->
+      <aside class="meeting-media">
+        <img
+          src="{{ meeting_image_url or '/static/images/meeting/hero.jpg' }}"
+          alt="Showroom / model apartment terrace"
+          width="1200" height="900" loading="lazy" decoding="async">
+      </aside>
+
+      <!-- Right: form card -->
+      <div class="meeting-card">
+        <h2 class="meeting-title">SCHEDULE A MEETING</h2>
+
+        <form class="form form-meeting" method="post" action="/api/meetings">
+          <div class="row">
+            <div class="field">
+              <label for="m-name">Full Name*</label>
+              <input id="m-name" required name="name" type="text" placeholder="Full Name">
+            </div>
+
+            <div class="field">
+              <label for="m-phone">Phone Number*</label>
+              <input id="m-phone" required name="phone" type="tel" placeholder="+8801XXXXXXXXX" inputmode="tel">
+            </div>
+
+            <div class="field">
+              <label for="m-email">Email Address</label>
+              <input id="m-email" name="email" type="email" placeholder="you@example.com">
+            </div>
+
+            <div class="field">
+              <label for="m-time">Select a Time</label>
+              <select id="m-time" name="preferred_time_slot">
+                <option value="">Select A Time</option>
+                <option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option>
+                <option>12:00 PM</option><option>2:00 PM</option><option>3:00 PM</option>
+                <option>4:00 PM</option><option>5:00 PM</option><option>6:00 PM</option>
+              </select>
+            </div>
+
+            <input type="hidden" name="preferred_date" value="">
+            <input type="hidden" name="source_page" value="{{ request.url.path }}">
+          </div>
+
+          <button type="submit" class="btn btn-quiet">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<link rel="stylesheet" href="/static/css/meeting.css?v={{ assetv }}">

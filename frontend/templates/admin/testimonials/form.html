@@ -1,0 +1,85 @@
+{#frontend/templates/admin/testimonials/form.html#}
+{% extends "admin/master.html" %}
+
+{% block title %}{{ 'Create Testimonial' if mode == 'create' else 'Edit Testimonial — ' ~ form.id }}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>{{ 'Create Testimonial' if mode == 'create' else ('Edit Testimonial — ' ~ form.id) }}</h3>
+  <a href="/admin/testimonials" class="btn btn-back">
+    <i class="fas fa-arrow-left"></i> Back to List
+  </a>
+</div>
+
+{% if error %}
+  <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="card">
+  <form method="post" action="{{ '/admin/testimonials/new' if mode == 'create' else ('/admin/testimonials/' ~ form.id ~ '/edit') }}" class="form-card">
+    <input type="hidden" name="csrf_token" value="{{ request.cookies.get('XSRF-TOKEN','') }}">
+
+    <div class="grid">
+      <div>
+        <label>Comment Person Name *</label>
+        <input type="text" name="name" value="{{ form.name or '' }}" required>
+      </div>
+
+      <div>
+        <label>Comment Person Type/Role *</label>
+        <select name="role" required>
+          <option value="">-- Select --</option>
+          <option value="Landowner" {% if form.role == 'Landowner' %}selected{% endif %}>Landowner</option>
+          <option value="Homeowner" {% if form.role == 'Homeowner' %}selected{% endif %}>Homeowner</option>
+          <option value="Tenant" {% if form.role == 'Tenant' %}selected{% endif %}>Tenant</option>
+          <!-- Add other roles as needed -->
+        </select>
+      </div>
+      
+      <div>
+        <label>About which project? *</label>
+        <select name="project_id" required>
+          <option value="">-- Select Project --</option>
+          {% for project in projects %}
+            <option value="{{ project.id }}" {% if project.id == form.project_id %}selected{% endif %}>{{ project.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Comments/Quote *</label>
+        <textarea name="quote" required style="width: 100%; height: 35px;">{{ form.quote or '' }}</textarea>
+      </div>
+
+      <div>
+        <label>Video URL</label>
+        <input type="url" name="video_url" value="{{ form.video_url or '' }}">
+      </div>
+
+      <div>
+        <label>Sort Order</label>
+        <input type="number" name="sort_order" value="{{ form.sort_order }}" required>
+      </div>
+
+      <div>
+        <label>Published It?</label>
+        <select name="published">
+          <option value="Yes" {% if form.published == 'Yes' %}selected{% endif %}>Yes</option>
+          <option value="No" {% if form.published == 'No' %}selected{% endif %}>No</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Save</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

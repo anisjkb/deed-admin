@@ -1,0 +1,72 @@
+{% extends "admin/master.html" %}
+
+{% block title %}Role wise Rights{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h3>Role wise Rights</h3>
+</div>
+
+{% if flashes and flashes|length %}
+  <div class="flash-stack">
+    {% for f in flashes %}
+      <div class="alert alert-{{ f.category }}">{{ f.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<form class="search-bar" method="get" action="/admin/rights">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search roles by id or name...">
+  <button class="btn" type="submit" aria-label="Search"><i class="fas fa-search"></i></button>
+</form>
+
+<div class="card" style="padding:12px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width:100px;">Role ID</th>
+        <th style="width:200px;">Role Name</th>
+        <th>Status</th>
+        {% if perms.edit %}
+          <th class="table-actions">Actions</th>
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.role_id }}</td>
+        <td class="wrap">{{ r.role_name }}</td>
+        <td class="nowrap">{{ r.status }}</td>
+        {% if perms.edit %}
+        <td class="actions">
+          <a class="btn btn-xs" href="/admin/rights/edit/{{ r.role_id }}" title="Edit rights">
+            <i class="fas fa-edit"></i>
+          </a>
+        </td>
+        {% endif %}
+      </tr>
+      {% else %}
+      <tr>
+        {% if perms.edit %}
+          <td colspan="4" class="muted">No roles found.</td>
+        {% else %}
+          <td colspan="3" class="muted">No roles found.</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="pagination">
+  {% for p in range(1, pages+1) %}
+    {% set is_active = 'active' if p == page else '' %}
+    <a class="page {{ is_active }}" href="/admin/rights?page={{ p }}&size={{ size }}{% if q %}&q={{ q }}{% endif %}">
+      {{ p }}
+    </a>
+  {% endfor %}
+</div>
+{% endblock %}

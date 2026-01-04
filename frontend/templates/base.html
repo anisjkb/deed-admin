@@ -1,0 +1,66 @@
+<!-- frontend/templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}deed-admin{% endblock %}</title>
+
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='favicon/favicon.svg')}}" sizes="16x16" />
+
+  <!-- Font Awesome 5 (needed for confirm.js titles/icons) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+  <!-- Global CSS (always) -->
+  <link rel="stylesheet" href="{{ url_for('static', path='css/common.css') }}?v={{ static_version }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/admin/main.css') }}?v={{ static_version }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/toast.css') }}?v={{ static_version }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/cropper.min.css') }}?v={{ static_version }}"/>
+
+  <!-- Page-specific CSS (auth pages, etc.) -->
+  {% block extra_css %}{% endblock %}
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    {% include 'partials/_header.html' %}
+  </header>
+
+  <!-- Main content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    {% include 'partials/_footer.html' %}
+  </footer>
+
+  <!-- ✅ GLOBAL CONFIRM MODAL
+       confirm.js requires these exact IDs -->
+  <div id="deleteConfirmModal" class="delete-modal-overlay" style="display:none;">
+    <div class="delete-modal-box">
+      <h3><i class="fas fa-exclamation-triangle"></i> Confirm</h3>
+      <p id="deleteMessage">Are you sure?</p>
+      <div class="delete-actions">
+        <button id="confirmDeleteBtn" class="btn btn-danger">Okay</button>
+        <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Scripts -->
+  <script nonce="{{ request.state.csp_nonce }}" src="{{ url_for('static', path='js/ui/toast.js') }}?v={{ static_version }}" defer></script>
+  <script nonce="{{ request.state.csp_nonce }}" src="{{ url_for('static', path='js/menu-toggle.js') }}?v={{ static_version }}" defer></script>
+  <script nonce="{{ request.state.csp_nonce }}" src="{{ url_for('static', path='js/cropper.min.js') }}?v={{ static_version }}" defer></script>
+
+  <!-- ✅ confirm.js MUST be loaded for modal usage -->
+  <script nonce="{{ request.state.csp_nonce }}" src="{{ url_for('static', path='js/admin/confirm.js') }}?v={{ static_version }}" defer></script>
+
+  <!-- ✅ session-timeout.js provides SessionTimeout.handleAuthFlag() -->
+  <script nonce="{{ request.state.csp_nonce }}" src="{{ url_for('static', path='js/auth/session-timeout.js') }}?v={{ static_version }}" defer></script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

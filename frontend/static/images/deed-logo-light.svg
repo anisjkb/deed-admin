@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 103.92 51.03">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ec1f2e;
+      }
+
+      .cls-2 {
+        letter-spacing: .5em;
+      }
+
+      .cls-3 {
+        font-family: AcuminConcept-Medium, 'Acumin Variable Concept';
+        font-size: 5.35px;
+        font-variation-settings: 'wght' 500, 'wdth' 100, 'slnt' 0;
+        font-weight: 500;
+      }
+
+      .cls-3, .cls-4 {
+        fill: #045a8e;
+      }
+
+      .cls-5 {
+        fill: #4b61ab;
+      }
+
+      .cls-6 {
+        letter-spacing: .5em;
+      }
+
+      .cls-7 {
+        letter-spacing: .5em;
+      }
+
+      .cls-8 {
+        letter-spacing: .49em;
+      }
+
+      .cls-9 {
+        letter-spacing: .5em;
+      }
+
+      .cls-10 {
+        letter-spacing: .5em;
+      }
+
+      .cls-11 {
+        letter-spacing: .5em;
+      }
+
+      .cls-12 {
+        letter-spacing: .52em;
+      }
+
+      .cls-13 {
+        letter-spacing: .51em;
+      }
+
+      .cls-14 {
+        letter-spacing: .5em;
+      }
+
+      .cls-15 {
+        fill: #a82427;
+      }
+
+      .cls-16 {
+        letter-spacing: .51em;
+      }
+
+      .cls-17 {
+        letter-spacing: .49em;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer_1">
+    <g>
+      <g>
+        <polygon class="cls-1" points="23.29 26.75 35.88 19.57 23.29 12.66 23.29 26.75"/>
+        <polygon class="cls-1" points="23.71 50.92 23.51 51.03 23.29 38.87 23.71 38.64 35.95 31.82 35.95 43.98 24.56 50.44 23.71 50.92"/>
+        <g>
+          <polygon class="cls-4" points="23.29 26.75 23.29 39.15 0 25.84 0 13.65 23.29 26.75"/>
+          <polygon class="cls-5" points="35.45 6.08 23.71 12.43 23.29 12.65 23.14 12.74 10.52 19.57 0 13.65 22.03 .74 23.14 .09 23.16 .08 23.29 0 23.71 .21 24.44 .58 35.45 6.08"/>
+          <polygon class="cls-15" points="23.51 51.03 23.14 50.83 0 37.9 10.63 31.82 23.14 38.79 23.29 38.87 23.51 51.03"/>
+        </g>
+      </g>
+      <g>
+        <g>
+          <path class="cls-4" d="M43.03,19.89l.03,8.23h5.1s3.19-.59,3.39-6.84c.19-6.25-3.47-6.45-3.47-6.45h-3.69l-.81,2.21c-1.87.09-3.53.22-3.53.22l2.47-6.8h6.11s6.07.32,5.75,10.68c-.32,10.36-5.61,11.33-5.61,11.33h-8.45l-.04-12.59h2.75Z"/>
+          <path class="cls-4" d="M92.56,19.89l.03,8.23h5.1s3.19-.59,3.39-6.84c.19-6.25-3.47-6.45-3.47-6.45h-3.69l-.81,2.21c-1.87.09-3.53.22-3.53.22l2.47-6.8h6.11s6.07.32,5.75,10.68c-.32,10.36-5.61,11.33-5.61,11.33h-8.45l-.04-12.59h2.75Z"/>
+          <path class="cls-4" d="M71.94,28.44v3.94h-11.91s-4.47.09-5.08-6.44c0-1.84.24-6.44,4.43-7.68,4.19,0,9.77-.14,9.77-.14v3.82s0,.03.01.09c-1.38.02-4.95.05-7.78.05-3.59.56-3.79,2.63-3.79,3.46.53,2.94,4.35,2.9,4.35,2.9h10Z"/>
+          <path class="cls-1" d="M71.77,12.71c-.05.43-.28,1.01-1.13,1.1-1.36.05-10.89.09-10.89.09,0,0-4.66-.37-4.87,7.04v-5.95s.22-4.39,3.87-4.66c3.65,0,13.02,0,13.02,0v1.91s.03.2,0,.47Z"/>
+          <path class="cls-4" d="M89.16,28.44v3.94h-11.91s-4.47.09-5.08-6.44c0-1.84.24-6.44,4.43-7.68,4.19,0,9.77-.14,9.77-.14v3.82s0,.03.01.09c-1.38.02-4.95.05-7.78.05-3.59.56-3.79,2.63-3.79,3.46.53,2.94,4.35,2.9,4.35,2.9h10Z"/>
+          <path class="cls-1" d="M88.99,12.71c-.05.43-.28,1.01-1.13,1.1-1.36.05-10.89.09-10.89.09,0,0-4.66-.37-4.87,7.04v-5.95s.22-4.39,3.87-4.66c3.65,0,13.02,0,13.02,0v1.91s.03.2,0,.47Z"/>
+        </g>
+        <text class="cls-3" transform="translate(43.64 39.3) scale(.75 1)"><tspan class="cls-7" x="0" y="0">w</tspan><tspan class="cls-11" x="6.8" y="0">i</tspan><tspan class="cls-9" x="10.8" y="0">t</tspan><tspan class="cls-6" x="15.2" y="0">h p</tspan><tspan class="cls-8" x="30.71" y="0">r</tspan><tspan class="cls-13" x="35.27" y="0">o</tspan><tspan class="cls-10" x="40.95" y="0">s</tspan><tspan class="cls-16" x="46.18" y="0">p</tspan><tspan class="cls-14" x="51.97" y="0">e</tspan><tspan class="cls-17" x="57.48" y="0">r</tspan><tspan class="cls-11" x="62.05" y="0">i</tspan><tspan class="cls-12" x="66.05" y="0">t</tspan><tspan class="cls-2" x="70.6" y="0">y</tspan></text>
+      </g>
+    </g>
+  </g>
+</svg>
