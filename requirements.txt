@@ -2,9 +2,9 @@ fastapi
 uvicorn
 python-multipart
 passlib[bcrypt]
-python-jose
+python-jose[cryptography]
 python-dotenv
 panel
 bokeh
-Jinja2Templates
-python-jose[cryptography]
+jinja2
+starlette
