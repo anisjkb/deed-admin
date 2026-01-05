@@ -10,3 +10,4 @@ jinja2
 starlette
 SQLAlchemy>=2
 asyncpg
+itsdangerous
