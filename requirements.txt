@@ -8,3 +8,5 @@ panel
 bokeh
 jinja2
 starlette
+SQLAlchemy>=2
+asyncpg
