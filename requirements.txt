@@ -11,3 +11,5 @@ starlette
 SQLAlchemy>=2
 asyncpg
 itsdangerous
+pydantic>=2
+pydantic-settings
