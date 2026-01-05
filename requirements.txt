@@ -13,3 +13,4 @@ asyncpg
 itsdangerous
 pydantic>=2
 pydantic-settings
+pytz
