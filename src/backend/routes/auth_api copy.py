@@ -11,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.backend.utils.database import get_db
+from src.backend.models.refresh_token import RefreshToken
 from src.backend.utils.auth import (
     authenticate_user,
     issue_tokens_response,
@@ -18,6 +19,12 @@ from src.backend.utils.auth import (
     revoke_refresh_response,
     get_current_user,
     registration_response,
+    REFRESH_COOKIE_NAME,
+    _hmac_hash,
+    _get_session_start_from_token_row,
+    _enforce_hard_session_limit_if_enabled,
+    rotate_refresh_response,
+    revoke_refresh_response,
 )
 from src.backend.utils.view import render
 from src.backend.utils.csrf import csrf_protect
@@ -101,27 +108,41 @@ async def login(
 @auth_api.post("/refresh", dependencies=[Depends(csrf_protect)])
 async def refresh_token(request: Request, db: AsyncSession = Depends(get_db)):
     """
-    ✅ Keeps your existing rotate_refresh_response() behavior,
-    but adds a pre-check to enforce absolute max session age (even if active).
+    🔁 Refresh access token using refresh-token cookie only
 
-    If refresh cookie is missing/invalid/expired:
-      - revoke_refresh_response() clears cookies
-      - 401 is raised (your error_handler can redirect + modal UX)
+    Security guarantees:
+    - No access token required
+    - CSRF protected
+    - Refresh token rotation
+    - Sliding refresh expiry
+    - Absolute session cap enforced (via session_start)
+    - Multi-tab safe logout
     """
-    rt = request.cookies.get("refresh_token")
-    if not rt:
-        # No refresh cookie -> not authenticated
+
+    raw_refresh = request.cookies.get(REFRESH_COOKIE_NAME)
+    if not raw_refresh:
+        # No refresh cookie → unauthenticated
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    payload = verify_refresh_token(rt)  # enforces exp + max session age via session_start
-    if not payload:
-        # Clear cookies server-side (best UX + security)
+    # 🔐 Look up refresh token row (hashed)
+    token = await db.scalar(
+        select(RefreshToken).where(
+            RefreshToken.token_hash == _hmac_hash(raw_refresh),
+            RefreshToken.is_revoked.is_(False),
+        )
+    )
+
+    # ❌ Invalid / revoked / expired
+    if not token or token.expires_at < now_local():
         await revoke_refresh_response(db, request)
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    # Still rotate/slide exactly as before
-    return await rotate_refresh_response(db, request)
+    # 🔒 Enforce absolute session lifetime (ENV-driven)
+    session_start = _get_session_start_from_token_row(token)
+    _enforce_hard_session_limit_if_enabled(session_start)
 
+    # 🔁 Rotate refresh + issue new access token
+    return await rotate_refresh_response(db, request)
 
 @auth_api.post("/logout", dependencies=[Depends(csrf_protect)])
 async def logout(request: Request, db: AsyncSession = Depends(get_db)):

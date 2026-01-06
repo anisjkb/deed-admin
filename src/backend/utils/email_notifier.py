@@ -1,64 +1,94 @@
 # src/backend/utils/email_notifier.py
-# Purpose: Universal email sender function with all parameters optional
 import os
 import smtplib
+import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from fastapi import HTTPException
 from dotenv import load_dotenv
 
-# Load .env variables
 load_dotenv()
 
+EMAIL_PROVIDER = os.getenv("EMAIL_PROVIDER", "smtp").lower()
+
 def send_email(
-    to: str = None,
-    subject: str = None,
-    body: str = None,
-    attachment: str = None,
-    from_email: str = None,
-    from_password: str = None,
-    smtp_server: str = None,
-    smtp_port: int = None
+    to: str,
+    subject: str = "",
+    body: str = "",
 ):
     """
-    Universal email sender function.
-    Reads SMTP config from .env if not passed as parameters.
+    Universal email sender.
+    - Railway → HTTPS (Resend)
+    - VPS → SMTP (Gmail / any)
     """
 
     try:
-        # Defaults (from .env if not provided)
-        from_email = from_email or os.getenv("EMAIL_USER")
-        from_password = from_password or os.getenv("EMAIL_PASS")
-        smtp_server = smtp_server or os.getenv("SMTP_SERVER")
-        smtp_port = smtp_port or int(os.getenv("SMTP_PORT"))
-
-        if not to:
-            raise ValueError("Recipient email (to) is required.")
-        if not subject:
-            subject = "No Subject"
-        if not body:
-            body = ""
-
-        # Create message
-        msg = MIMEMultipart()
-        msg["From"] = from_email
-        msg["To"] = to
-        msg["Subject"] = subject
-        msg.attach(MIMEText(body, "plain"))
-
-        # Optional text attachment
-        if attachment:
-            msg.attach(MIMEText(attachment, "plain"))
-
-        # Setup server
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(from_email, from_password)
-        server.sendmail(msg["From"], msg["To"], msg.as_string())
-        server.quit()
-
-        print(f"📧 Email sent to {to} with subject '{subject}'")
+        if EMAIL_PROVIDER == "resend":
+            _send_resend(to, subject, body)
+        else:
+            _send_smtp(to, subject, body)
 
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+        print(f"❌ Email error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Email service is temporarily unavailable. Please try again later."
+        )
+
+
+# ─────────────────────────────────────────────────────────
+# RESEND (HTTPS — Railway safe)
+# ─────────────────────────────────────────────────────────
+def _send_resend(to: str, subject: str, body: str):
+    api_key = os.getenv("RESEND_API_KEY")
+    from_email = os.getenv("EMAIL_FROM", "onboarding@resend.dev")
+
+    if not api_key:
+        raise RuntimeError("RESEND_API_KEY not set")
+
+    res = requests.post(
+        "https://api.resend.com/emails",
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "from": from_email,
+            "to": [to],
+            "subject": subject,
+            "text": body,
+        },
+        timeout=10,
+    )
+
+    if res.status_code >= 400:
+        raise RuntimeError(f"Resend error: {res.text}")
+
+    print(f"📧 Email sent via Resend to {to}")
+
+
+# ─────────────────────────────────────────────────────────
+# SMTP (VPS / Local)
+# ─────────────────────────────────────────────────────────
+def _send_smtp(to: str, subject: str, body: str):
+    from_email = os.getenv("EMAIL_USER")
+    from_password = os.getenv("EMAIL_PASS")
+    smtp_server = os.getenv("SMTP_SERVER")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+
+    if not all([from_email, from_password, smtp_server]):
+        raise RuntimeError("SMTP credentials not configured")
+
+    msg = MIMEMultipart()
+    msg["From"] = from_email
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+
+    server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
+    server.starttls()
+    server.login(from_email, from_password)
+    server.sendmail(from_email, to, msg.as_string())
+    server.quit()
+
+    print(f"📧 Email sent via SMTP to {to}")
