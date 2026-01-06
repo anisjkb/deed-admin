@@ -218,13 +218,13 @@ async def forgot_username(
     )
 
     if is_json:
-        return {"message": "If the email exists, the login ID has been sent."}
+        return {"message": "The login ID has been sent to your email address."}
 
     return await redirect_with_flash(
         request.session,
         "/login",
         "success",
-        "If the email exists, the login ID has been sent.",
+        "The login ID has been sent to your email address.",
     )
 
 # -----------------------------------------------------------------------------
@@ -277,7 +277,7 @@ async def forgot_password(
         ),
     )
 
-    return {"message": "If the account exists, a reset link has been sent."}
+    return {"message": "Password reset link has been sent to your email."}
 
 
 class ResetPasswordRequest(BaseModel):
