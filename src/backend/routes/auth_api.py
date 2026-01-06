@@ -263,8 +263,8 @@ async def forgot_password(
     db.add(token_entry)
     await db.commit()
 
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:8000")
-    reset_link = f"{frontend_url.rstrip('/')}/reset-password/{reset_token}"
+    api_url = os.getenv("API_URL", "http://localhost:8000")
+    reset_link = f"{api_url.rstrip('/')}/reset-password/{reset_token}"
 
     background_tasks.add_task(
         send_email,
