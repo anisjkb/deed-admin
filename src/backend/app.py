@@ -36,6 +36,7 @@ from src.backend.routes.routes_banner_pages import router as banners_router
 from src.backend.routes.routes_testimonials import router as testimonials_router
 from src.backend.routes.routers_image_editor import router as image_editor_router
 from src.backend.routes.routes_feedback_pages import router as feedbacks_router
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
 # ─────────────────────────────────────────────────────────
 # Ensure modern image types return correct Content-Type
@@ -44,6 +45,9 @@ mimetypes.add_type("image/avif", ".avif")
 mimetypes.add_type("image/webp", ".webp")
 
 app = FastAPI(title="deed-admin", version="1.0")
+
+# Proxy middleware (optional)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # ----------------------------------------------------------
 # ABSOLUTE PATHS
