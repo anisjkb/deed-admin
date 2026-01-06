@@ -56,12 +56,17 @@ frontend_template_path = os.path.join(project_root, "frontend", "templates")
 # ----------------------------------------------------------
 # GLOBAL MEDIA ROOT - always used by deed-web + deed-admin
 # ----------------------------------------------------------
-IMAGE_MEDIA_URL = "/images"  # Public URL prefix
-IMAGE_MEDIA_ROOT = r"E:/Data Science/Agentic AI/deed/src/backend/static/images"
-os.makedirs(IMAGE_MEDIA_ROOT, exist_ok=True)
 
 # Make MEDIA_ROOT available to media.py
+IMAGE_MEDIA_URL = os.getenv("IMAGE_MEDIA_URL", "/images")
+
+# Use env var in production, fallback to repo folder
+DEFAULT_MEDIA_ROOT = os.path.join(project_root, "src", "backend", "static", "images")
+IMAGE_MEDIA_ROOT = os.getenv("IMAGE_MEDIA_ROOT", DEFAULT_MEDIA_ROOT)
+
+os.makedirs(IMAGE_MEDIA_ROOT, exist_ok=True)
 os.environ["IMAGE_MEDIA_ROOT"] = IMAGE_MEDIA_ROOT
+
 
 # ----------------------------------------------------------
 # VERIFY PATHS
