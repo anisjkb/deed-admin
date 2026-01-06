@@ -30,7 +30,6 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   // Submit login
   try {
     const data = new FormData(form);
-    // Improved CSRF token handling
     const csrf = document.cookie.split("; ").find(c => c.startsWith("XSRF-TOKEN="));
     const csrfToken = csrf ? csrf.split("=")[1] : null;
 
@@ -49,7 +48,6 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       credentials: "include",
     });
 
-    // Get the response object from the backend
     const out = await res.json().catch((err) => {
       console.error("Error parsing response:", err);
       return {};
@@ -69,6 +67,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
         btn.disabled = false;
         btn.textContent = btn.dataset.prevText || "Log In";
       }
+      // Set error message from backend response
       err.textContent = out.detail || out.message || "Invalid login ID or password."; // Ensure error message is displayed
     }
 
