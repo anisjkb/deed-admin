@@ -40,70 +40,6 @@ def _safe_args(exc: Exception) -> str:
         return "No additional details"
 
 
-# ----------------------------------------
-# MESSAGE HELPERS
-# ----------------------------------------
-def _is_invalid_login_message(msg: str) -> bool:
-    m = (msg or "").strip().lower()
-    # your exact login error
-    if "invalid login id or password" in m:
-        return True
-    # common variants
-    if "invalid username or password" in m:
-        return True
-    if "invalid credentials" in m:
-        return True
-    return False
-
-
-def _is_session_expired_401(msg: str) -> bool:
-    """
-    Decide if a 401 is truly session/token-related (not wrong-password).
-    """
-    m = (msg or "").strip().lower()
-
-    # explicitly NOT session-expired: wrong password
-    if _is_invalid_login_message(m):
-        return False
-
-    # token/session-style phrases
-    token_words = (
-        "not authenticated",
-        "token",
-        "expired",
-        "session",
-        "signature has expired",
-        "invalid token",
-        "missing token",
-        "invalid authentication",
-        "credentials could not be validated",
-    )
-    return any(w in m for w in token_words)
-
-
-def _normalise_user_message(status_code: int, raw_message: str) -> str:
-    """
-    Normalise user-facing message BUT do NOT destroy specific login errors.
-    """
-    if status_code == 401:
-        # Keep invalid login text as-is
-        if _is_invalid_login_message(raw_message):
-            return "Invalid login ID or password."
-        # Only session/token 401s become timeout message
-        if _is_session_expired_401(raw_message):
-            return "Your session has timed out for security reasons. Please log in again."
-        # Otherwise keep what the backend said (safe default)
-        return raw_message or "Not authenticated."
-
-    if status_code == 403:
-        return "Access denied. You do not have permission to access this page."
-    if status_code == 404:
-        return "The requested resource was not found."
-    if status_code == 500:
-        return "Internal Server Error. Please try again later."
-    return raw_message
-
-
 def _json_error(
     status_code: int,
     message: str,
@@ -112,17 +48,22 @@ def _json_error(
 ) -> JSONResponse:
     """
     Unified JSON error response for APIs and non-HTML requests.
-
-    IMPORTANT:
-    - returns both `detail` (raw server detail) and `message` (user-facing)
-      so frontend can use either without breaking older code.
+    Note: We keep professional user-facing messages here.
     """
-    raw_detail = message or ""
-    user_message = _normalise_user_message(status_code, raw_detail)
+
+    # Normalize user-facing message
+    user_message = message
+    if status_code == 401:
+        user_message = "Your session has timed out for security reasons. Please log in again."
+    elif status_code == 403:
+        user_message = "Access denied. You do not have permission to access this page."
+    elif status_code == 404:
+        user_message = "The requested resource was not found."
+    elif status_code == 500:
+        user_message = "Internal Server Error. Please try again later."
 
     payload: Dict[str, Any] = {
-        "message": user_message,            # user-friendly
-        "detail": raw_detail,               # original
+        "message": user_message,
         "error_type": exc.__class__.__name__,
         "status_code": status_code,
     }
@@ -130,10 +71,7 @@ def _json_error(
     if extra:
         payload.update(extra)
 
-    _trace(
-        f"RETURN JSONResponse | status={status_code} "
-        f"detail={raw_detail!r} message={user_message!r}"
-    )
+    _trace(f"RETURN JSONResponse | status={status_code} message={user_message!r}")
     return JSONResponse(status_code=status_code, content=payload)
 
 
@@ -201,12 +139,16 @@ def _looks_like_logged_in(request: Request) -> bool:
     Best-effort detection:
     - Authorization: Bearer ...
     - Common auth cookies (access/refresh/session)
+    This lets us treat 403 differently:
+      - logged in => stay within admin (redirect back to previous admin page)
+      - not logged in => go public home and show modal
     """
     auth = (request.headers.get("authorization") or "").lower()
     if auth.startswith("bearer "):
         return True
 
     cookie = (request.headers.get("cookie") or "").lower()
+    # include a few common names used across apps; harmless if not present
     for key in ("access_token", "refresh_token", "session", "sessionid", "xsrf-token"):
         if key in cookie:
             return True
@@ -217,10 +159,12 @@ def _looks_like_logged_in(request: Request) -> bool:
 def _redirect_back_with_flag(request: Request, flag: str) -> RedirectResponse:
     """
     Redirect back to the previous page (Referer) if possible, preserving UI state.
-    Fallback to /admin/master
+    Fallback to /admin/master for logged-in admin users.
     """
     ref = (request.headers.get("referer") or "").strip()
 
+    # Only trust referers from our own app host in local/dev; in production you may tighten this.
+    # Also avoid redirect loop: don't redirect back to the same forbidden URL.
     same_path = False
     try:
         same_path = ref.endswith(request.url.path)
@@ -233,6 +177,7 @@ def _redirect_back_with_flag(request: Request, flag: str) -> RedirectResponse:
         _trace(f"RETURN RedirectResponse -> {url} (303) [back to referer]")
         return RedirectResponse(url=url, status_code=303)
 
+    # Fallback: admin landing page
     url = f"/admin/master?auth={flag}"
     _trace(f"RETURN RedirectResponse -> {url} (303) [fallback]")
     return RedirectResponse(url=url, status_code=303)
@@ -242,17 +187,16 @@ async def custom_exception_handler(request: Request, exc: Exception):
     """
     Custom exception handler.
 
-    Behavior:
-    - For /admin/* HTML navigation:
-        * 401 -> redirect to /?auth=expired
-        * 403 -> if logged in, redirect back with ?auth=forbidden else /?auth=forbidden
-    - For API/fetch:
-        * return JSON with correct message/detail (no blanket 401 overwrite)
+    Updated behavior (your requirements):
+    1) If user is already logged in and hits 403 on /admin/* (HTML navigation):
+       - DO NOT kick to public home
+       - Redirect back to previous page (Referer) and show Access Denied modal there
+         (keeps app on the same page/state)
+    2) If user is NOT logged in and hits any /admin/*:
+       - Redirect to public home and show modal there
     """
-    _trace(
-        f"ENTER handler | path={request.url.path} method={request.method} "
-        f"exc={exc.__class__.__name__}"
-    )
+
+    _trace(f"ENTER handler | path={request.url.path} method={request.method} exc={exc.__class__.__name__}")
 
     # -----------------------------
     # 1) Starlette HTTPException
@@ -264,7 +208,6 @@ async def custom_exception_handler(request: Request, exc: Exception):
         _trace(f"BRANCH StarletteHTTPException | status={status} detail={detail!r}")
         _log_http(request, status, detail, exc)
 
-        # Admin-page navigation redirects
         if (
             request.method in ("GET", "HEAD")
             and _is_admin_path(request)
@@ -273,19 +216,20 @@ async def custom_exception_handler(request: Request, exc: Exception):
         ):
             flag = "expired" if status == 401 else "forbidden"
 
+            # 401 => not logged in / session expired => go public home
             if status == 401:
-                _trace(f"ADMIN HTML 401 -> Redirect /?auth={flag}")
+                _trace(f"RETURN RedirectResponse -> /?auth={flag} (303) [401 admin->home]")
                 return RedirectResponse(url=f"/?auth={flag}", status_code=303)
 
-            # 403
+            # 403 => permission denied
+            # if logged in => stay in admin context (redirect back)
             if _looks_like_logged_in(request):
-                _trace("ADMIN HTML 403 (logged in) -> redirect back")
                 return _redirect_back_with_flag(request, flag=flag)
 
-            _trace(f"ADMIN HTML 403 (not logged in) -> Redirect /?auth={flag}")
+            # not logged in => go public home
+            _trace(f"RETURN RedirectResponse -> /?auth={flag} (303) [403 not-logged-in admin->home]")
             return RedirectResponse(url=f"/?auth={flag}", status_code=303)
 
-        # API JSON
         return _json_error(status_code=status, message=detail, exc=exc)
 
     # -----------------------------
@@ -298,7 +242,6 @@ async def custom_exception_handler(request: Request, exc: Exception):
         _trace(f"BRANCH FastAPIHTTPException | status={status} detail={detail!r}")
         _log_http(request, status, detail, exc)
 
-        # Admin-page navigation redirects
         if (
             request.method in ("GET", "HEAD")
             and _is_admin_path(request)
@@ -308,17 +251,15 @@ async def custom_exception_handler(request: Request, exc: Exception):
             flag = "expired" if status == 401 else "forbidden"
 
             if status == 401:
-                _trace(f"ADMIN HTML 401 -> Redirect /?auth={flag}")
+                _trace(f"RETURN RedirectResponse -> /?auth={flag} (303) [401 admin->home]")
                 return RedirectResponse(url=f"/?auth={flag}", status_code=303)
 
             if _looks_like_logged_in(request):
-                _trace("ADMIN HTML 403 (logged in) -> redirect back")
                 return _redirect_back_with_flag(request, flag=flag)
 
-            _trace(f"ADMIN HTML 403 (not logged in) -> Redirect /?auth={flag}")
+            _trace(f"RETURN RedirectResponse -> /?auth={flag} (303) [403 not-logged-in admin->home]")
             return RedirectResponse(url=f"/?auth={flag}", status_code=303)
 
-        # API JSON
         return _json_error(status_code=status, message=detail, exc=exc)
 
     # -----------------------------

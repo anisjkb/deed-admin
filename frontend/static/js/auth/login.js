@@ -1,13 +1,16 @@
-//frontend/static/js/auth/login.js
+// frontend/static/js/auth/login.js
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const form = e.target;
-  const err = document.getElementById("errorMsg");
-  if (err) err.textContent = "";
 
-  // Clear previous inline errors
-  ["logInIdError", "passwordError"].forEach(id => {
+  // UI elements
+  const errorEl = document.getElementById("errorMsg");
+  const btn = form.querySelector("button[type='submit']"); // define ONCE so catch/finally can use it
+
+  // Reset messages
+  if (errorEl) errorEl.textContent = "";
+  ["logInIdError", "passwordError"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.textContent = "";
   });
@@ -27,19 +30,21 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
     return;
   }
 
-  // Submit login
+  // Disable button + show loading
+  if (btn) {
+    btn.disabled = true;
+    btn.dataset.prevText = btn.textContent || "Log In";
+    btn.textContent = "logging in...";
+  }
+
   try {
     const data = new FormData(form);
-    const csrf = document.cookie.split("; ").find(c => c.startsWith("XSRF-TOKEN="));
-    const csrfToken = csrf ? csrf.split("=")[1] : null;
 
-    const btn = form.querySelector("button[type='submit']"); // Define the submit button
-
-    if (btn) {
-      btn.disabled = true;
-      btn.dataset.prevText = btn.textContent || "";
-      btn.textContent = "logging in...";
-    }
+    // CSRF token
+    const csrfCookie = document.cookie
+      .split("; ")
+      .find((c) => c.startsWith("XSRF-TOKEN="));
+    const csrfToken = csrfCookie ? csrfCookie.split("=")[1] : null;
 
     const res = await fetch("/auth/login", {
       method: "POST",
@@ -48,39 +53,37 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       credentials: "include",
     });
 
-    const out = await res.json().catch((err) => {
-      console.error("Error parsing response:", err);
-      return {};
-    });
+    // Parse response safely (maybe JSON, maybe not)
+    let out = {};
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      out = await res.json().catch(() => ({}));
+    } else {
+      const text = await res.text().catch(() => "");
+      out = { message: text };
+    }
 
-    // Check for successful login
     if (res.ok) {
       if (out.access_token) Auth.setAccessToken(out.access_token);
-      window.location.href = "/admin/master"; // Redirect to admin master page
+      window.location.href = "/admin/master";
       return;
     }
 
-    // Show backend error (your backend returns detail)
-    console.error("Login failed:", res.status, out);
-    if (err) {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = btn.dataset.prevText || "Log In";
-      }
-      // Set error message from backend response
-      err.textContent = out.detail || out.message || "Invalid login ID or password."; // Ensure error message is displayed
-    }
+    // Prefer backend detail (FastAPI) then message (your handler) then fallback
+    const backendMsg =
+      out.detail ||
+      out.message ||
+      `Login failed (HTTP ${res.status}). Please try again.`;
 
-  } catch (err) {
-    const btn = form.querySelector("button[type='submit']"); // Define the submit button
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = btn.dataset.prevText || "Log In";
+    console.error("Login failed:", res.status, out);
+
+    if (errorEl) {
+      errorEl.textContent = backendMsg;
     }
-    console.error("Network error:", err); // Add error logging
-    if (err) err.textContent = "Network error, please try again";
+  } catch (networkErr) {
+    console.error("Network error:", networkErr);
+    if (errorEl) errorEl.textContent = "Network error, please try again.";
   } finally {
-    const btn = form.querySelector("button[type='submit']"); // Define the submit button
     if (btn) {
       btn.disabled = false;
       btn.textContent = btn.dataset.prevText || "Log In";

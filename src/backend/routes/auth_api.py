@@ -97,7 +97,6 @@ async def register(
     except IntegrityError:
         raise HTTPException(status_code=409, detail="Duplicate registration data.")
 
-
 @auth_api.post("/login", dependencies=[Depends(csrf_protect)])
 async def login(
     request: Request,
